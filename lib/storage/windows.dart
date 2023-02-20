@@ -6,7 +6,9 @@ import 'package:permission_handler/permission_handler.dart';
 class WindowsStorage implements BaseStorage {
   bool withPermission = false;
   @override
-  String externalStoragePath = 'D:/';
+  List<String> externalStoragePath = [];
+  @override
+  String initStoragePath = 'c:/';
 
   WindowsStorage() {
     grantPermission();
@@ -42,7 +44,7 @@ class WindowsStorage implements BaseStorage {
   }
 
   @override
-  String getExternalStoragePath() {
-    return 'D:/';
+  List<String> getExternalStoragePath() {
+    return externalStoragePath;
   }
 }

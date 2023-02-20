@@ -12,7 +12,7 @@ class Config {
 
   Config._internal() {
     // 初始化配置
-    _initPath = storage.externalStoragePath;
+    _initPath = storage.externalStoragePath[0];
   }
 
   String get initPath => _initPath;

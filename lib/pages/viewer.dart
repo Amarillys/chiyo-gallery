@@ -1,4 +1,4 @@
-import 'package:chiyo_gallery/components/file-manager.dart';
+import 'package:chiyo_gallery/components/file_manager.dart';
 import 'package:flutter/cupertino.dart';
 
 class ViewerPage extends StatefulWidget {

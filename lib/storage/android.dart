@@ -1,15 +1,17 @@
 import "dart:io";
-import "package:chiyo_gallery/storage/base.dart";
 import "package:path/path.dart" as p;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:external_path/external_path.dart';
-import 'package:chiyo_gallery/utils/config.dart';
+import 'package:logger/logger.dart';
+
+import "base.dart";
 
 class AndroidStorage implements BaseStorage {
-  static final _config = Config();
   bool withPermission = false;
   @override
-  String externalStoragePath = '/storage';
+  List<String> externalStoragePath = [];
+  @override
+  String initStoragePath = '/storage';
 
   AndroidStorage() {
     grantPermission();
@@ -27,25 +29,27 @@ class AndroidStorage implements BaseStorage {
       withPermission = true;
     }
     if (withPermission) {
-      var externalStorages = await ExternalPath.getExternalStorageDirectories();
-      if (externalStorages.length > 1) {
-        externalStoragePath = '${externalStorages[1]}/sekai/image/doll/raifufu6129';
-      } else {
-        externalStoragePath = externalStorages[0];
-      }
+      externalStoragePath = await ExternalPath.getExternalStorageDirectories();
     }
-    _config.setInitPath(externalStoragePath);
     return withPermission;
   }
 
   @override
   Future<List<FileSystemEntity>> dirFiles(String folderPath, [List<String> extensions = const []]) async {
+    if (folderPath == '/storage') {
+      return Future.value(externalStoragePath.map((storagePath) => Directory(storagePath)).toList());
+    }
     Directory folder = Directory(folderPath);
     if (!await folder.exists()) {
       throw FileSystemException ('folder does not exist', folderPath);
     }
 
-    List<FileSystemEntity> fileList = await folder.list(recursive: true).toList();
+    List<FileSystemEntity> fileList = [];
+    try {
+      fileList = await folder.list(recursive: false).toList();
+    } on FileSystemException catch (e) {
+      Logger().w('读取路径出错：$e');
+    }
     if (extensions.isEmpty) return fileList;
 
     return fileList.where((file) {
@@ -66,7 +70,7 @@ class AndroidStorage implements BaseStorage {
   }
 
   @override
-  String getExternalStoragePath() {
+  List<String> getExternalStoragePath() {
     return externalStoragePath;
   }
 }
