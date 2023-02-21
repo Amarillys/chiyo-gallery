@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:chiyo_gallery/components/file.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_avif/flutter_avif.dart';
 import "package:path/path.dart" as p;
 
 import 'package:chiyo_gallery/storage/storage.dart';
 import 'package:global_configs/global_configs.dart';
 
 import '../utils/image_util.dart';
+import '../pages/viewer.dart';
 
 class FileBrowser extends StatefulWidget {
   const FileBrowser({super.key});
@@ -19,7 +19,8 @@ class FileBrowser extends StatefulWidget {
 class ViewerState extends State<FileBrowser> {
   static final storage = Storage.instance;
   String currentPath = '';
-  List<ExtendedFile> files = [];
+  List<MediaFile> files = [];
+  bool permissionGranted = false;
 
   @override
   void initState() {
@@ -41,12 +42,22 @@ class ViewerState extends State<FileBrowser> {
         height: 500,
         child: ListView.builder(
           itemCount: files.length,
-          itemBuilder: (context, index) {
+          itemBuilder: (itemContext, index) {
             return Card(
               child: ListTile(
                 leading: setupThumbNailOrIcons(files[index]),
                 title: Text(p.basename(files[index].path)),
                 onTap: () {
+                  final filePath = files[index].path;
+                  final pathStat = File(filePath).statSync();
+                  if (pathStat.type == FileSystemEntityType.file && ImageUtil.isImageFile(filePath)) {
+                    final imagePaths = files.where((f) => f.shouldHaveThumbnails).map((f) => f.path).toList();
+                    final imageIndex = imagePaths.indexOf(filePath);
+                    Navigator.push(context, MaterialPageRoute(
+                        builder: (context) =>
+                            ViewerPage(imagePaths: imagePaths, imageIndex:imageIndex)));
+                    return;
+                  }
                   loadPath(files[index].path);
                 },
               ),
@@ -58,7 +69,10 @@ class ViewerState extends State<FileBrowser> {
   }
 
   loadPath([String path = '']) async {
-    await storage.grantPermission();
+    if (!permissionGranted) {
+      await storage.grantPermission();
+    }
+    permissionGranted = true;
     if (path == '') {
       currentPath = GlobalConfigs().get('initPath');
       if (currentPath == '') {
@@ -70,20 +84,38 @@ class ViewerState extends State<FileBrowser> {
 
     final List<FileSystemEntity> fileToShow =
         await storage.dirFiles(currentPath);
-    final fileList = fileToShow.map((f) => ExtendedFile(f.path));
+    final fileList = fileToShow.map((f) => MediaFile(f.path));
     setState(() {
       files = fileList.toList();
     });
 
-    files.where((f) => f.shouldHaveThumbnails).forEach((f) {
-      ImageUtil.generateThumbnail(f.path).then((thumbPath) => setState(() {
-            f.thumbnailPath = thumbPath;
-          }));
-    });
+    generateNormalThumbnails();
+    final avifFiles = files.where((f) => f.shouldHaveThumbnails && f.path.contains('.avif')).toList();
+    for (var i = 0; i < avifFiles.length; ++i) {
+      if (avifFiles[i].thumbnailFile == null) {
+        final thumbnail = await ImageUtil.generateThumbnail(avifFiles[i].path);
+        setState(() {
+          avifFiles[i].thumbnailFile = thumbnail;
+        });
+      }
+    }
+  }
+
+  void generateNormalThumbnails() async {
+    final normalFiles = files.where((f) => f.shouldHaveThumbnails && !f.path.contains('.avif')).toList();
+    for (var i = 0; i < normalFiles.length; ++i) {
+      if (normalFiles[i].thumbnailFile == null) {
+        final thumbnail = await ImageUtil.generateThumbnail(normalFiles[i].path);
+        setState(() {
+          normalFiles[i].thumbnailFile = thumbnail;
+        });
+      }
+    }
   }
 
   bool goToParentDirectory() {
-    final parentPath = Uri.parse(currentPath).resolve('./').toString();
+    final uriInfo = Uri.parse(currentPath);
+    final parentPath = uriInfo.resolve('./').toString();
     if (parentPath == '/') {
       return false;
     }
@@ -91,15 +123,16 @@ class ViewerState extends State<FileBrowser> {
     return true;
   }
 
-  static setupThumbNailOrIcons(ExtendedFile file) {
+  static setupThumbNailOrIcons(MediaFile file) {
     if (file.type == '') {
       return const Icon(Icons.folder);
     }
     if (file.shouldHaveThumbnails) {
-      if (file.thumbnailPath == '') {
+      if (file.thumbnailFile == null) {
         return const Icon(Icons.insert_drive_file);
+      } else {
+        return Image.file(file.thumbnailFile!, fit: BoxFit.fill);
       }
-      return file.thumbnailPath.contains('avif') ? AvifImage.file(File(file.thumbnailPath)) : Image.file(File(file.thumbnailPath));
     } else {
       return const Icon(Icons.insert_drive_file);
     }

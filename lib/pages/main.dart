@@ -5,7 +5,7 @@ import 'package:flutter_avif/flutter_avif.dart';
 import 'dart:io';
 import 'package:chiyo_gallery/utils/config.dart' as config;
 import 'package:toast/toast.dart';
-import 'package:chiyo_gallery/pages/viewer.dart';
+import 'package:chiyo_gallery/pages/browser.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -55,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
           if (orientation == Orientation.portrait) {
             return Center(child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const <Widget>[ViewerPage()],
+                children: const <Widget>[BrowserPage()],
             ));
           } else {
             return Row(
@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Container(
                         color: Colors.green,
                         child: const Center(child: Text('Left')))),
-                const Expanded(flex: 5, child: ViewerPage())
+                const Expanded(flex: 5, child: BrowserPage())
               ],
             );
           }
