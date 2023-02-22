@@ -46,8 +46,8 @@ dependencies:
   flutter_cache_manager: ^3.3.0
   flutter_image_compress: ^1.1.3
   image: ^4.0.15
-  url_launcher: ^6.1.9
   open_file: ^3.2.1
+  flutter_native_splash: ^2.2.18
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +75,7 @@ flutter:
   assets:
     - assets/images/srt.avif
     - assets/configs/dev.json
+    - assets/images/splash_center.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -101,3 +102,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+flutter_native_splash:
+  color: "#E9CFE8"
+  color_dark: "#363640"
+  image: "assets/images/splash_center.png"
+  image_dark: "assets/images/splash_center.png"
+  android_gravity: center
+  web: false
