@@ -1,4 +1,4 @@
-package com.example.flutter.chiyo_gallery
+package moe.misuzu.chiyo_gallery
 
 import io.flutter.embedding.android.FlutterActivity
 

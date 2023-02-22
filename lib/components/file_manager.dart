@@ -38,17 +38,17 @@ class ViewerState extends State<FileBrowser> {
           return false;
         }
       },
-      child: SizedBox(
-        height: 500,
+      child: SizedBox.expand(
         child: ListView.builder(
           itemCount: files.length,
           itemBuilder: (itemContext, index) {
+            final currentFile = files[index];
             return Card(
               child: ListTile(
-                leading: setupThumbNailOrIcons(files[index]),
-                title: Text(p.basename(files[index].path)),
+                leading: setupThumbNailOrIcons(currentFile),
+                title: Text(p.basename(currentFile.path)),
                 onTap: () {
-                  final filePath = files[index].path;
+                  final filePath = currentFile.path;
                   final pathStat = File(filePath).statSync();
                   if (pathStat.type == FileSystemEntityType.file) {
                     if (ImageUtil.isImageFile(filePath)) {
@@ -58,9 +58,11 @@ class ViewerState extends State<FileBrowser> {
                           builder: (context) =>
                               ViewerPage(imagePaths: imagePaths, imageIndex:imageIndex)));
                       return;
+                    } else {
+                      storage.openFile(currentFile.path);
                     }
                   } else {
-                    loadPath('${files[index].path}/');
+                    loadPath('${currentFile.path}/');
                   }
                 },
               ),
@@ -127,7 +129,7 @@ class ViewerState extends State<FileBrowser> {
 
   static setupThumbNailOrIcons(MediaFile file) {
     if (file.type == '') {
-      return const Icon(Icons.folder);
+      return const Icon(Icons.folder, size: 50, color: Colors.green);
     }
     if (file.shouldHaveThumbnails) {
       if (file.thumbnailFile == null) {
@@ -136,7 +138,11 @@ class ViewerState extends State<FileBrowser> {
         return Image.file(file.thumbnailFile!, fit: BoxFit.fill);
       }
     } else {
-      return const Icon(Icons.insert_drive_file);
+      switch (file.type) {
+        case '.mp4':
+          return const Icon(Icons.video_collection_outlined, size: 50);
+      }
+      return const Icon(Icons.insert_drive_file, size: 50);
     }
   }
 }

@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example.flutter" "\0"
+            VALUE "CompanyName", "Chiyo Sekai" "\0"
             VALUE "FileDescription", "chiyo_gallery" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "chiyo_gallery" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.example.flutter. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2023 moe.misuzu.chiyo_gallery. All rights reserved." "\0"
             VALUE "OriginalFilename", "chiyo_gallery.exe" "\0"
             VALUE "ProductName", "chiyo_gallery" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

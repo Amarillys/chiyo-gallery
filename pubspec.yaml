@@ -37,7 +37,6 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter_avif: ^1.0.1
   external_path: ^1.0.3
-  path_provider: ^2.0.12
   path: ^1.8.2
   permission_handler: ^10.2.0
   toast: ^0.3.0
@@ -47,6 +46,8 @@ dependencies:
   flutter_cache_manager: ^3.3.0
   flutter_image_compress: ^1.1.3
   image: ^4.0.15
+  url_launcher: ^6.1.9
+  open_file: ^3.2.1
 
 dev_dependencies:
   flutter_test:

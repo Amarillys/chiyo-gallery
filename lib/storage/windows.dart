@@ -1,7 +1,8 @@
 import "dart:io";
-import "package:chiyo_gallery/storage/base.dart";
+import 'package:open_file/open_file.dart';
 import "package:path/path.dart" as p;
-import 'package:permission_handler/permission_handler.dart';
+
+import "base.dart";
 
 class WindowsStorage implements BaseStorage {
   bool withPermission = false;
@@ -46,5 +47,11 @@ class WindowsStorage implements BaseStorage {
   @override
   List<String> getExternalStoragePath() {
     return externalStoragePath;
+  }
+
+
+  @override
+  Future<ResultType> openFile(String path) {
+    return Future.value(ResultType.done);
   }
 }

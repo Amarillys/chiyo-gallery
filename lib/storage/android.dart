@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:external_path/external_path.dart';
 import 'package:logger/logger.dart';
 
+import 'package:open_file/open_file.dart';
 import "base.dart";
 
 class AndroidStorage implements BaseStorage {
@@ -47,6 +48,7 @@ class AndroidStorage implements BaseStorage {
     List<FileSystemEntity> fileList = [];
     try {
       fileList = await folder.list(recursive: false).toList();
+      fileList.sort((a, b) => a.path.compareTo(b.path));
     } on FileSystemException catch (e) {
       Logger().w('读取路径出错：$e');
     }
@@ -72,5 +74,10 @@ class AndroidStorage implements BaseStorage {
   @override
   List<String> getExternalStoragePath() {
     return externalStoragePath;
+  }
+
+  @override
+  Future<ResultType> openFile(String path) async {
+    return (await OpenFile.open(path)).type;
   }
 }
