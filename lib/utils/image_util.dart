@@ -38,4 +38,8 @@ class ImageUtil {
     final type = path_util.extension(filePath).toLowerCase();
     return ImageUtil.shouldHaveThumbnails(type);
   }
+
+  static Future<File?> getThumbFile(String imagePath) async {
+    return (await DefaultCacheManager().getFileFromCache(imagePath))?.file;
+  }
 }

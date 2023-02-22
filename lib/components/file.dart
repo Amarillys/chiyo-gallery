@@ -18,9 +18,4 @@ class MediaFile {
     type = path_util.extension(filePath).toLowerCase();
     shouldHaveThumbnails = ImageUtil.shouldHaveThumbnails(type);
   }
-
-  Future<void> initThumbnail() async {
-    thumbnailFile = (await DefaultCacheManager().getFileFromCache(path))?.file;
-    return Future.value();
-  }
 }

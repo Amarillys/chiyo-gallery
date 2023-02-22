@@ -50,15 +50,18 @@ class ViewerState extends State<FileBrowser> {
                 onTap: () {
                   final filePath = files[index].path;
                   final pathStat = File(filePath).statSync();
-                  if (pathStat.type == FileSystemEntityType.file && ImageUtil.isImageFile(filePath)) {
-                    final imagePaths = files.where((f) => f.shouldHaveThumbnails).map((f) => f.path).toList();
-                    final imageIndex = imagePaths.indexOf(filePath);
-                    Navigator.push(context, MaterialPageRoute(
-                        builder: (context) =>
-                            ViewerPage(imagePaths: imagePaths, imageIndex:imageIndex)));
-                    return;
+                  if (pathStat.type == FileSystemEntityType.file) {
+                    if (ImageUtil.isImageFile(filePath)) {
+                      final imagePaths = files.where((f) => f.shouldHaveThumbnails).map((f) => f.path).toList();
+                      final imageIndex = imagePaths.indexOf(filePath);
+                      Navigator.push(context, MaterialPageRoute(
+                          builder: (context) =>
+                              ViewerPage(imagePaths: imagePaths, imageIndex:imageIndex)));
+                      return;
+                    }
+                  } else {
+                    loadPath('${files[index].path}/');
                   }
-                  loadPath(files[index].path);
                 },
               ),
             );
@@ -89,25 +92,24 @@ class ViewerState extends State<FileBrowser> {
       files = fileList.toList();
     });
 
-    generateNormalThumbnails();
     final avifFiles = files.where((f) => f.shouldHaveThumbnails && f.path.contains('.avif')).toList();
-    for (var i = 0; i < avifFiles.length; ++i) {
-      if (avifFiles[i].thumbnailFile == null) {
-        final thumbnail = await ImageUtil.generateThumbnail(avifFiles[i].path);
-        setState(() {
-          avifFiles[i].thumbnailFile = thumbnail;
-        });
-      }
-    }
+    final normalImageFiles = files.where((f) => f.shouldHaveThumbnails && !f.path.contains('.avif')).toList();
+    generateNormalThumbnails(avifFiles);
+    generateNormalThumbnails(normalImageFiles);
   }
 
-  void generateNormalThumbnails() async {
-    final normalFiles = files.where((f) => f.shouldHaveThumbnails && !f.path.contains('.avif')).toList();
-    for (var i = 0; i < normalFiles.length; ++i) {
-      if (normalFiles[i].thumbnailFile == null) {
-        final thumbnail = await ImageUtil.generateThumbnail(normalFiles[i].path);
+  void generateNormalThumbnails(images) async {
+    for (var i = 0; i < images.length; ++i) {
+      final MediaFile image = images[i];
+      final File? thumbCache = await ImageUtil.getThumbFile(image.path);
+      if (thumbCache != null) {
         setState(() {
-          normalFiles[i].thumbnailFile = thumbnail;
+          image.thumbnailFile = thumbCache;
+        });
+      } else {
+        final thumbnail = await ImageUtil.generateThumbnail(image.path);
+        setState(() {
+          image.thumbnailFile = thumbnail;
         });
       }
     }
@@ -115,7 +117,7 @@ class ViewerState extends State<FileBrowser> {
 
   bool goToParentDirectory() {
     final uriInfo = Uri.parse(currentPath);
-    final parentPath = uriInfo.resolve('./').toString();
+    final parentPath = uriInfo.resolve('../').toString();
     if (parentPath == '/') {
       return false;
     }

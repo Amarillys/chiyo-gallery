@@ -34,6 +34,7 @@ class AvifConvertor {
       height = originalHeight;
     }
     codec.dispose();
+    // TO-DO: optimize image size
     final imageBytes =
         (await firstFrame.image.toByteData(format: ImageByteFormat.rawRgba))!
             .buffer
