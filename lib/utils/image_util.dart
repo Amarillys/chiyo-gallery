@@ -6,7 +6,9 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path/path.dart' as path_util;
 
-import './avif_convert.dart';
+
+import 'package:chiyo_gallery/components/file.dart';
+import 'package:chiyo_gallery/utils/avif_convert.dart';
 
 class ImageUtil {
   static final List<String> thumbnailExt = ['.jpg', '.png', '.avif', '.jfif', '.jpeg', '.heic', '.webp'];
@@ -41,5 +43,12 @@ class ImageUtil {
 
   static Future<File?> getThumbFile(String imagePath) async {
     return (await DefaultCacheManager().getFileFromCache(imagePath))?.file;
+  }
+
+
+  static Future<File> generateNormalThumbnails(MediaFile image) async {
+      File? thumbCache = await ImageUtil.getThumbFile(image.path);
+      thumbCache ??= await ImageUtil.generateThumbnail(image.path);
+      return Future.value(thumbCache);
   }
 }

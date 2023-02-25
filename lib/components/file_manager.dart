@@ -4,34 +4,55 @@ import 'package:flutter/material.dart';
 import "package:path/path.dart" as p;
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 
-import 'package:chiyo_gallery/storage/storage.dart';
-import 'package:global_configs/global_configs.dart';
-
-import '../utils/image_util.dart';
-import '../pages/viewer.dart';
+import 'package:chiyo_gallery/controller/file/base.dart';
+import 'package:chiyo_gallery/pages/viewer.dart';
+import 'package:chiyo_gallery/utils/image_util.dart';
 
 class FileBrowser extends StatefulWidget {
-  const FileBrowser({super.key});
+  final FileController controller;
+
+  const FileBrowser({super.key, required this.controller});
 
   @override
   State<StatefulWidget> createState() => ViewerState();
 }
 
 class ViewerState extends State<FileBrowser> {
-  static final storage = Storage.instance;
-  String currentPath = '';
-  int rowWidth = 330;
+  static const int rowWidth = 330;
   List<MediaFile> files = [];
-  bool permissionGranted = false;
+  String currentPath = '';
 
   @override
   void initState() {
     super.initState();
-    initUIParams();
-    loadPath();
+    initPath();
   }
 
-  void initUIParams() {}
+  void initPath([String params = '']) async {
+    final fetchedFiles = await widget.controller.fetchFile(params);
+    setState(() {
+      files = fetchedFiles;
+    });
+
+    final waitThumbFiles = files.where((f) => f.shouldHaveThumbnails);
+
+    fetchThumb(waitThumbFiles);
+  }
+
+  fetchThumb(Iterable<MediaFile> files) async {
+    for (var i = 0; i < files.length; ++i) {
+      final newThumbFile = await ImageUtil.generateNormalThumbnails(files.elementAt(i));
+      setState(() {
+        files.elementAt(i).thumbnailFile = newThumbFile;
+      });
+    }
+    /* TO-DO
+    final taskStream = Stream<Future<File>>.fromIterable(
+        files.map((file) => ImageUtil.generateNormalThumbnails(file))).toList();
+    const concurrency = 3;
+
+    await for (final taskBatch in taskStream.batch(concurrency)) {}*/
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,10 +103,12 @@ class ViewerState extends State<FileBrowser> {
                                             imageIndex: imageIndex)));
                                 return;
                               } else {
-                                storage.openFile(currentFile.path);
+                                FileController.storage
+                                    .openFile(currentFile.path);
                               }
                             } else {
-                              loadPath('${currentFile.path}/');
+                              currentPath = '${currentFile.path}/';
+                              initPath(currentPath);
                             }
                           },
                         ),
@@ -96,61 +119,17 @@ class ViewerState extends State<FileBrowser> {
     }));
   }
 
-  loadPath([String path = '']) async {
-    if (!permissionGranted) {
-      await storage.grantPermission();
-    }
-    permissionGranted = true;
-    if (path == '') {
-      currentPath = GlobalConfigs().get('initPath');
-      if (currentPath == '') {
-        currentPath = storage.initStoragePath;
-      }
-    } else {
-      currentPath = path;
-    }
-
-    final List<FileSystemEntity> fileToShow =
-        await storage.dirFiles(currentPath);
-    final fileList = fileToShow.map((f) => MediaFile(f.path));
-    setState(() {
-      files = fileList.toList();
-    });
-
-    final avifFiles = files
-        .where((f) => f.shouldHaveThumbnails && f.path.contains('.avif'))
-        .toList();
-    final normalImageFiles = files
-        .where((f) => f.shouldHaveThumbnails && !f.path.contains('.avif'))
-        .toList();
-    generateNormalThumbnails(avifFiles);
-    generateNormalThumbnails(normalImageFiles);
-  }
-
-  void generateNormalThumbnails(images) async {
-    for (var i = 0; i < images.length; ++i) {
-      final MediaFile image = images[i];
-      final File? thumbCache = await ImageUtil.getThumbFile(image.path);
-      if (thumbCache != null) {
-        setState(() {
-          image.thumbnailFile = thumbCache;
-        });
-      } else {
-        final thumbnail = await ImageUtil.generateThumbnail(image.path);
-        setState(() {
-          image.thumbnailFile = thumbnail;
-        });
-      }
-    }
-  }
-
   bool goToParentDirectory() {
     final uriInfo = Uri.parse(currentPath);
     final parentPath = uriInfo.resolve('../').toString();
     if (parentPath == '/') {
       return false;
     }
-    loadPath(parentPath);
+    widget.controller.fetchFile(parentPath).then((fetchFiles) {
+      setState(() {
+        files = fetchFiles;
+      });
+    });
     return true;
   }
 

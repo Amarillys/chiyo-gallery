@@ -40,7 +40,7 @@ class AndroidStorage implements BaseStorage {
 
   @override
   Future<List<FileSystemEntity>> dirFiles(String folderPath, [List<String> extensions = const []]) async {
-    if (folderPath == '/storage') {
+    if (folderPath == '/storage' || folderPath == '/storage/') {
       return Future.value(externalStoragePath.map((storagePath) => Directory(storagePath)).toList());
     }
     Directory folder = Directory(folderPath);
