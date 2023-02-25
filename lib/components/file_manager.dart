@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:chiyo_gallery/components/file.dart';
 import 'package:flutter/material.dart';
 import "package:path/path.dart" as p;
+import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 
 import 'package:chiyo_gallery/storage/storage.dart';
 import 'package:global_configs/global_configs.dart';
@@ -19,58 +20,80 @@ class FileBrowser extends StatefulWidget {
 class ViewerState extends State<FileBrowser> {
   static final storage = Storage.instance;
   String currentPath = '';
+  int rowWidth = 330;
   List<MediaFile> files = [];
   bool permissionGranted = false;
 
   @override
   void initState() {
     super.initState();
+    initUIParams();
     loadPath();
   }
 
+  void initUIParams() {}
+
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (!goToParentDirectory()) {
-          return true;
-        } else {
-          return false;
-        }
-      },
-      child: SizedBox.expand(
-        child: ListView.builder(
-          itemCount: files.length,
-          itemBuilder: (itemContext, index) {
-            final currentFile = files[index];
-            return Card(
-              child: ListTile(
-                leading: setupThumbNailOrIcons(currentFile),
-                title: Text(p.basename(currentFile.path)),
-                onTap: () {
-                  final filePath = currentFile.path;
-                  final pathStat = File(filePath).statSync();
-                  if (pathStat.type == FileSystemEntityType.file) {
-                    if (ImageUtil.isImageFile(filePath)) {
-                      final imagePaths = files.where((f) => f.shouldHaveThumbnails).map((f) => f.path).toList();
-                      final imageIndex = imagePaths.indexOf(filePath);
-                      Navigator.push(context, MaterialPageRoute(
-                          builder: (context) =>
-                              ViewerPage(imagePaths: imagePaths, imageIndex:imageIndex)));
-                      return;
-                    } else {
-                      storage.openFile(currentFile.path);
-                    }
-                  } else {
-                    loadPath('${currentFile.path}/');
-                  }
-                },
-              ),
-            );
-          },
-        ),
-      ),
-    );
+    return WillPopScope(onWillPop: () async {
+      if (!goToParentDirectory()) {
+        return true;
+      } else {
+        return false;
+      }
+    }, child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+      double parentWidth = constraints.maxWidth;
+      final int columnCount = parentWidth ~/ rowWidth;
+      final int rowCount = (files.length / columnCount).ceil();
+      return SizedBox.expand(
+          child: files.isNotEmpty
+              ? SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: LayoutGrid(
+                    columnGap: 10,
+                    rowGap: -12,
+                    columnSizes: List.generate(columnCount, (index) => 1.fr),
+                    rowSizes: List.generate(
+                        rowCount, (index) => const FixedTrackSize(80)),
+                    children: List.generate(files.length, (index) {
+                      final currentFile = files[index];
+                      return Card(
+                        color: const Color.fromRGBO(255, 255, 255, 1.0),
+                        child: ListTile(
+                          leading: setupThumbNailOrIcons(currentFile),
+                          title: Text(p.basename(currentFile.path),
+                              maxLines: 2, overflow: TextOverflow.ellipsis),
+                          onTap: () {
+                            final filePath = currentFile.path;
+                            final pathStat = File(filePath).statSync();
+                            if (pathStat.type == FileSystemEntityType.file) {
+                              if (ImageUtil.isImageFile(filePath)) {
+                                final imagePaths = files
+                                    .where((f) => f.shouldHaveThumbnails)
+                                    .map((f) => f.path)
+                                    .toList();
+                                final imageIndex = imagePaths.indexOf(filePath);
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ViewerPage(
+                                            imagePaths: imagePaths,
+                                            imageIndex: imageIndex)));
+                                return;
+                              } else {
+                                storage.openFile(currentFile.path);
+                              }
+                            } else {
+                              loadPath('${currentFile.path}/');
+                            }
+                          },
+                        ),
+                      );
+                    }),
+                  ))
+              : const Text('No files'));
+    }));
   }
 
   loadPath([String path = '']) async {
@@ -94,8 +117,12 @@ class ViewerState extends State<FileBrowser> {
       files = fileList.toList();
     });
 
-    final avifFiles = files.where((f) => f.shouldHaveThumbnails && f.path.contains('.avif')).toList();
-    final normalImageFiles = files.where((f) => f.shouldHaveThumbnails && !f.path.contains('.avif')).toList();
+    final avifFiles = files
+        .where((f) => f.shouldHaveThumbnails && f.path.contains('.avif'))
+        .toList();
+    final normalImageFiles = files
+        .where((f) => f.shouldHaveThumbnails && !f.path.contains('.avif'))
+        .toList();
     generateNormalThumbnails(avifFiles);
     generateNormalThumbnails(normalImageFiles);
   }

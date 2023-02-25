@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:global_configs/global_configs.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import './storage/storage.dart';
 import './pages/main.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  runApp(const MyApp());
+  runApp(const ChiyoGallery());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ChiyoGallery extends StatelessWidget {
+  const ChiyoGallery({super.key});
 
   static final storage = Storage.instance;
   static final Future<GlobalConfigs> _config = init();
@@ -19,12 +21,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final locale = AppLocalizations.of(context);
     return FutureBuilder(
         future: _config,
         builder: (context, snapshot) {
+          
           if (snapshot.hasData) {
             FlutterNativeSplash.remove();
             return MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
               title: 'Chiyo Gallery',
               theme: ThemeData(
                 primarySwatch: Colors.pink,
@@ -32,13 +38,7 @@ class MyApp extends StatelessWidget {
               home: const MyHomePage(title: 'Chiyo Gallery'),
             );
           } else {
-            return MaterialApp(
-              title: 'Chiyo Gallery',
-              theme: ThemeData(
-                primarySwatch: Colors.pink,
-              ),
-              home: const Text('Initializing...')
-            );
+            return Text(locale!.initializing);
           }
         });
   }

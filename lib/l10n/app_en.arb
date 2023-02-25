@@ -1,0 +1,10 @@
+{
+  "helloWorld": "Hello Chiyo!",
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting"
+  },
+  "initializing": "Initializing...",
+  "@helloWorld": {
+    "description": "A normal waiting tips"
+  }
+}

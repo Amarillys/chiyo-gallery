@@ -34,8 +34,8 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
-  flutter_avif: ^1.0.1
+  cupertino_icons: ^1.0.5
+  flutter_avif: any
   external_path: ^1.0.3
   path: ^1.8.2
   permission_handler: ^10.2.0
@@ -48,6 +48,10 @@ dependencies:
   image: ^4.0.15
   open_file: ^3.2.1
   flutter_native_splash: ^2.2.18
+  flutter_layout_grid: ^2.0.1
+  intl: any
+  flutter_localizations: 
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -59,6 +63,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  intl_utils: ^2.8.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -83,6 +88,7 @@ flutter:
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages
 
+  generate: true
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a
@@ -109,3 +115,9 @@ flutter_native_splash:
   image_dark: "assets/images/splash_center.png"
   android_gravity: center
   web: false
+
+flutter_intl:
+  enabled: true
+  arb-dir: lib/l10n
+  template-arb-file: app_en.arb
+  output-localization-file: app_localizations.dart

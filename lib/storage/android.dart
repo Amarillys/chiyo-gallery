@@ -3,6 +3,7 @@ import "package:path/path.dart" as p;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:external_path/external_path.dart';
 import 'package:logger/logger.dart';
+import 'package:toast/toast.dart';
 
 import 'package:open_file/open_file.dart';
 import "base.dart";
@@ -31,6 +32,8 @@ class AndroidStorage implements BaseStorage {
     }
     if (withPermission) {
       externalStoragePath = await ExternalPath.getExternalStorageDirectories();
+    } else {
+      Toast.show('获取不到权限');
     }
     return withPermission;
   }

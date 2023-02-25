@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path/path.dart' as path_util;
 
 import '../utils/image_util.dart';

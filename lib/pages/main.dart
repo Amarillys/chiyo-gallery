@@ -1,10 +1,7 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_avif/flutter_avif.dart';
 import 'dart:io';
-import 'package:chiyo_gallery/utils/config.dart' as config;
 import 'package:toast/toast.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:chiyo_gallery/pages/browser.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -52,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
+          final locale = AppLocalizations.of(context);
           if (orientation == Orientation.portrait) {
             return Center(child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -64,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     flex: 2,
                     child: Container(
                         color: Colors.green,
-                        child: const Center(child: Text('Left')))),
+                        child: Center(child: Text(locale!.helloWorld)))),
                 const Expanded(flex: 5, child: BrowserPage())
               ],
             );
