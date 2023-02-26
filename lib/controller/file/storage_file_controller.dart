@@ -9,7 +9,8 @@ class StorageFileController implements FileController {
   bool permissionGranted = false;
 
   @override
-  Future<List<MediaFile>> fetchFile([String params = '']) async {
+  Future<List<MediaFile>> fetchFile(
+      {String params = '', String sortType = 'normal'}) async {
     String path = params;
     if (!permissionGranted) {
       await FileController.storage.grantPermission();
@@ -22,7 +23,24 @@ class StorageFileController implements FileController {
       }
     }
 
-    final List<FileSystemEntity> fileToShow = await FileController.storage.dirFiles(path);
-    return fileToShow.map((f) => MediaFile(f.path)).toList();
+    final List<FileSystemEntity> fileToShow =
+        await FileController.storage.dirFiles(path);
+
+    final files = fileToShow.map((f) => MediaFile(f.path));
+    if (sortType == 'date-down') {
+      files.toList().sort((a, b) {
+        return 0 - a.modified.compareTo(b.modified);
+      });
+    } else if (sortType == 'date-up') {
+      files.toList().sort((a, b) {
+        return a.modified.compareTo(b.modified);
+      });
+    }
+    return files.toList();
+  }
+
+  @override
+  bool canAccess(String path) {
+    return !FileController.storage.cannotAccessPath.contains(path);
   }
 }

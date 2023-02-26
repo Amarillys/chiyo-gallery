@@ -6,5 +6,9 @@
   "initializing": "Initializing...",
   "@helloWorld": {
     "description": "A normal waiting tips"
+  },
+  "oneMoreClickToExit": "Return again to exit...",
+  "@helloWorld": {
+    "description": "When return at root directory"
   }
 }

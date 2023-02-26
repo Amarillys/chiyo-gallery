@@ -14,9 +14,17 @@ class AndroidStorage implements BaseStorage {
   List<String> externalStoragePath = [];
   @override
   String initStoragePath = '/storage';
+  @override
+  List<String> cannotAccessPath = [];
+
+  bool getRooted = false;
 
   AndroidStorage() {
     grantPermission();
+    // TO-DO: check or grant root
+    if (!getRooted) {
+      cannotAccessPath = ['/', '../', '/storage/emulated'];
+    }
   }
 
   @override
@@ -39,19 +47,29 @@ class AndroidStorage implements BaseStorage {
   }
 
   @override
-  Future<List<FileSystemEntity>> dirFiles(String folderPath, [List<String> extensions = const []]) async {
+  Future<List<FileSystemEntity>> dirFiles(String folderPath,
+      {List<String> extensions = const []}) async {
     if (folderPath == '/storage' || folderPath == '/storage/') {
-      return Future.value(externalStoragePath.map((storagePath) => Directory(storagePath)).toList());
+      return Future.value(externalStoragePath
+          .map((storagePath) => Directory(storagePath))
+          .toList());
     }
     Directory folder = Directory(folderPath);
     if (!await folder.exists()) {
-      throw FileSystemException ('folder does not exist', folderPath);
+      throw FileSystemException('folder does not exist', folderPath);
     }
 
     List<FileSystemEntity> fileList = [];
     try {
       fileList = await folder.list(recursive: false).toList();
-      fileList.sort((a, b) => a.path.compareTo(b.path));
+      fileList.sort((a, b) {
+        if (a is Directory && b is File) {
+          return -1;
+        } else if (a is File && b is Directory) {
+          return 1;
+        }
+        return a.path.compareTo(b.path);
+      });
     } on FileSystemException catch (e) {
       Logger().w('读取路径出错：$e');
     }

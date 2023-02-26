@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:global_configs/global_configs.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import './storage/storage.dart';
 import './pages/main.dart';
@@ -21,11 +20,9 @@ class ChiyoGallery extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context);
     return FutureBuilder(
         future: _config,
         builder: (context, snapshot) {
-          
           if (snapshot.hasData) {
             FlutterNativeSplash.remove();
             return MaterialApp(
@@ -38,7 +35,7 @@ class ChiyoGallery extends StatelessWidget {
               home: const MyHomePage(title: 'Chiyo Gallery'),
             );
           } else {
-            return Text(locale!.initializing);
+            return const Text('initialing...');
           }
         });
   }

@@ -10,6 +10,8 @@ class WindowsStorage implements BaseStorage {
   List<String> externalStoragePath = [];
   @override
   String initStoragePath = 'c:/';
+  @override
+  List<String> cannotAccessPath = [];
 
   WindowsStorage() {
     grantPermission();
@@ -21,7 +23,7 @@ class WindowsStorage implements BaseStorage {
   }
 
   @override
-  Future<List<FileSystemEntity>> dirFiles(String folderPath, [List<String> extensions = const []]) async {
+  Future<List<FileSystemEntity>> dirFiles(String folderPath, {List<String> extensions = const [], String sortType = 'normal'}) async {
     Directory folder = Directory(folderPath);
     if (!await folder.exists()) {
       throw FileSystemException ('folder does not exist', folderPath);

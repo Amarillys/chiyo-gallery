@@ -52,6 +52,7 @@ dependencies:
   intl: any
   flutter_localizations: 
     sdk: flutter
+  executor: ^2.2.3
 
 dev_dependencies:
   flutter_test:
