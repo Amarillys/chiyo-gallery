@@ -24,7 +24,6 @@ class ChiyoGallery extends StatelessWidget {
         future: _config,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            FlutterNativeSplash.remove();
             return MaterialApp(
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
@@ -35,13 +34,16 @@ class ChiyoGallery extends StatelessWidget {
               home: const MyHomePage(title: 'Chiyo Gallery'),
             );
           } else {
-            return const Text('initialing...');
+            return const MaterialApp(
+                home: Text('initialing...'));
           }
         });
   }
 
   static Future<GlobalConfigs> init() async {
     await storage.grantPermission();
-    return GlobalConfigs().loadJsonFromdir('assets/configs/dev.json');
+    final config = await GlobalConfigs().loadJsonFromdir('assets/configs/dev.json');
+    FlutterNativeSplash.remove();
+    return config;
   }
 }

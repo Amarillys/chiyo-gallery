@@ -43,7 +43,6 @@ class ViewerState extends State<FileBrowser> {
     initPath();
 
     eventBus.on<SideBarTapEvent>().listen((event) {
-      scrollToTop();
       initPath(event.path);
     });
   }
@@ -67,6 +66,7 @@ class ViewerState extends State<FileBrowser> {
   }
 
   setupFile() {
+    scrollToTop();
     final waitThumbFiles = files.where((f) => f.shouldHaveThumbnails);
     fetchThumb(waitThumbFiles);
 
@@ -99,14 +99,13 @@ class ViewerState extends State<FileBrowser> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(onWillPop: () async {
-      return Future.value(!goToParentDirectory(context));
-    }, child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-      double parentWidth = constraints.maxWidth;
-      final int columnCount = parentWidth ~/ rowWidth;
-      final int rowCount = (files.length / columnCount).ceil();
-      return SizedBox.expand(
+    return WillPopScope(
+      onWillPop: () async { return !goToParentDirectory(context); },
+      child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        double parentWidth = constraints.maxWidth;
+        final int columnCount = parentWidth ~/ rowWidth;
+        final int rowCount = (files.length / columnCount).ceil();
+        return SizedBox.expand(
           child: files.isNotEmpty
               ? SingleChildScrollView(
                   scrollDirection: Axis.vertical,
@@ -119,16 +118,13 @@ class ViewerState extends State<FileBrowser> {
                     children: List.generate(files.length, (index) {
                       final currentFile = files[index];
                       return GestureDetector(
-                          onTap: () {
-                            onItemTap(currentFile);
-                          },
+                          onTap: () { onItemTap(currentFile); },
                           child: Card(
-                            color: const Color.fromRGBO(250, 250, 250, 0.3),
+                              color: const Color.fromRGBO(250, 250, 250, 0.3),
                               elevation: 0,
                               child: Row(
                                   mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Padding(
                                         padding: const EdgeInsets.only(left: 5, right: 10),

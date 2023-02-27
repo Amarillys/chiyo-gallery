@@ -53,19 +53,16 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (BuildContext context, Orientation orientation) {
           final locale = AppLocalizations.of(context);
           if (orientation == Orientation.portrait) {
-            return Center(child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const <Widget>[BrowserPage()],
-            ));
+            return Row(
+                  children: const <Widget>[
+                    Expanded(flex: 1, child: BrowserPage())
+                  ],
+                );
           } else {
             return Row(
-              children: <Widget>[
-                Expanded(
-                    flex: 2,
-                    child: Container(
-                        // color: Colors.green,
-                        child: const SideBar())),
-                const Expanded(flex: 5, child: BrowserPage())
+              children: const <Widget>[
+                Expanded(flex: 2, child: SideBar()),
+                Expanded(flex: 5, child: BrowserPage())
               ],
             );
           }
