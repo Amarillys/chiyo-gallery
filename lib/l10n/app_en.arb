@@ -10,5 +10,9 @@
   "oneMoreClickToExit": "Return again to exit...",
   "@helloWorld": {
     "description": "When return at root directory"
+  },
+  "noFiles": "No Files...> <",
+  "@noFiles": {
+    "description": "Tips show in empty folder."
   }
 }

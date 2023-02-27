@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:chiyo_gallery/components/file.dart';
+import 'package:chiyo_gallery/utils/string_util.dart';
 import 'package:flutter/material.dart';
 import "package:path/path.dart" as p;
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
@@ -10,6 +11,7 @@ import 'package:toast/toast.dart';
 import 'package:chiyo_gallery/controller/file/base.dart';
 import 'package:chiyo_gallery/pages/viewer.dart';
 import 'package:chiyo_gallery/utils/image_util.dart';
+import 'package:chiyo_gallery/components/underline.dart';
 
 class FileBrowser extends StatefulWidget {
   final FileController controller;
@@ -25,12 +27,22 @@ class ViewerState extends State<FileBrowser> {
   List<MediaFile> files = [];
   String currentPath = '';
   String sortType = 'normal';
+  late TextStyle descStyle;
   bool onExit = false;
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    loadConfig();
     initPath();
+  }
+
+  void loadConfig() {
+    descStyle = const TextStyle(
+        color: Color.fromRGBO(33, 33, 33, 0.5),
+        fontSize: 12
+    );
   }
 
   void initPath([String params = '']) async {
@@ -70,55 +82,62 @@ class ViewerState extends State<FileBrowser> {
           child: files.isNotEmpty
               ? SingleChildScrollView(
                   scrollDirection: Axis.vertical,
-                  child: Container(
-                      color: Colors.white,
-                      child: LayoutGrid(
-                        columnGap: 10,
-                        rowGap: -12,
-                        columnSizes:
-                            List.generate(columnCount, (index) => 1.fr),
-                        rowSizes: List.generate(
-                            rowCount, (index) => const FixedTrackSize(80)),
-                        children: List.generate(files.length, (index) {
-                          final currentFile = files[index];
-                          return GestureDetector(
-                              onTap: () {
-                                onItemTap(currentFile);
-                              },
-                              child: Card(
-                                  elevation: 0,
-                                  // color: const Color.fromRGBO(255, 255, 255, 1.0),
-                                  child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 5, right: 10),
-                                            child: setupThumbNailOrIcons(
-                                                currentFile)),
-                                        Expanded(
-                                          child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                            Text(p.basename(currentFile.path),
-                                                maxLines: 2,
-                                                overflow:
-                                                    TextOverflow.ellipsis),
-                                            Text(generateSizeDescription(currentFile.size),
-                                              style: const TextStyle(
-                                                color: Color.fromRGBO(33, 33, 33, 0.5),
-                                                fontSize: 13.0
-                                              )
-                                            )
+                  controller: _scrollController,
+                  child: LayoutGrid(
+                    columnGap: 10,
+                    rowGap: -12,
+                    columnSizes: List.generate(columnCount, (index) => 1.fr),
+                    rowSizes: List.generate(rowCount, (index) => const FixedTrackSize(80)),
+                    children: List.generate(files.length, (index) {
+                      final currentFile = files[index];
+                      return GestureDetector(
+                          onTap: () {
+                            onItemTap(currentFile);
+                          },
+                          child: Card(
+                            color: const Color.fromRGBO(250, 250, 250, 0.3),
+                              elevation: 0,
+                              child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.center,
+                                  children: [
+                                    Padding(
+                                        padding: const EdgeInsets.only(left: 5, right: 10),
+                                        child: setupThumbNailOrIcons(currentFile)),
+                                    Expanded(
+                                      child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                              Text(p.basename(currentFile.path),
+                                                  maxLines: 2,
+                                                  overflow: TextOverflow.ellipsis),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [Text(generateSizeDescription(currentFile.size),
+                                                    style: descStyle
+                                                ),
+                                                  Expanded(
+                                                    child: Align(
+                                                      alignment: Alignment.centerRight,
+                                                      child: Text(StringUtil.formatDate(currentFile.modified),
+                                                          style: descStyle))
+                                                )],
+                                              ),
+                                            const CustomUnderline()
                                           ]),
-                                        )
-                                      ])));
-                        }),
-                      )))
-              : const Text('No files'));
+                                    )
+                                  ])));
+                    }),
+                  ))
+              : Center(child: SizedBox(
+                  height: 200,
+                  child: Column(
+                      children: [const Icon(Icons.folder_off, size: 128, color: Colors.pink),
+                          Text(AppLocalizations.of(context)!.noFiles,
+                              style: const TextStyle(fontSize: 20, color: Colors.black45))])))
+      );
     }));
   }
 
@@ -138,7 +157,9 @@ class ViewerState extends State<FileBrowser> {
     }
     widget.controller.fetchFile(params: parentPath).then((fetchFiles) {
       setState(() {
+        scrollToTop();
         files = fetchFiles;
+        currentPath = parentPath;
       });
     });
     return true;
@@ -201,11 +222,19 @@ class ViewerState extends State<FileBrowser> {
     if (size > 0 && size < 1024) {
       return '$size Bytes';
     } else if (size > 1024 && size < 1048576) {
-      return '${size / 1024} KB';
+      return '${(size / 1024).toStringAsFixed(2)} KB';
     } else if (size > 1048576 && size <  1024*1024*1024) {
-      return '${size / 1048576} MB';
+      return '${(size / 1048576).toStringAsFixed(2)} MB';
     } else {
-      return '${size / 1073741824} GB';
+      return '${(size / 1073741824).toStringAsFixed(2)} GB';
     }
+  }
+
+  void scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(microseconds: 1),
+      curve: Curves.bounceIn
+    );
   }
 }
