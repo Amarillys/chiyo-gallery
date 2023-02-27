@@ -16,4 +16,6 @@ abstract class BaseStorage {
   Future<bool> grantPermission();
 
   Future<ResultType> openFile(String path);
+
+  String convertStoragePathForDisplay(String path);
 }

@@ -11,6 +11,7 @@ class MediaFile {
   String path = '';
   String icon = '';
   int size = 0;
+  int fileCount = 0;
   late DateTime modified;
 
   MediaFile(String filePath)  {
@@ -22,7 +23,20 @@ class MediaFile {
     final stat = file.statSync();
     if (stat.type == FileSystemEntityType.file) {
       size = stat.size;
+    } else if (stat.type == FileSystemEntityType.directory) {
+      type = 'directory';
     }
     modified = stat.modified;
   }
+
+  Future<int> getFileCount() async {
+    if (type == 'directory') {
+      await for (var entity in Directory(path).list()) {
+        fileCount++;
+      }
+      return fileCount;
+    }
+    return 0;
+  }
+
 }

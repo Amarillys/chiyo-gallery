@@ -1,13 +1,16 @@
 import 'dart:io';
-import 'package:chiyo_gallery/components/file.dart';
-import 'package:chiyo_gallery/utils/string_util.dart';
 import 'package:flutter/material.dart';
+import 'package:global_configs/global_configs.dart';
 import "package:path/path.dart" as p;
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:executor/executor.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:toast/toast.dart';
 
+import 'package:chiyo_gallery/components/file.dart';
+import 'package:chiyo_gallery/events/eventbus.dart';
+import 'package:chiyo_gallery/events/events_definition.dart';
+import 'package:chiyo_gallery/utils/string_util.dart';
 import 'package:chiyo_gallery/controller/file/base.dart';
 import 'package:chiyo_gallery/pages/viewer.dart';
 import 'package:chiyo_gallery/utils/image_util.dart';
@@ -23,6 +26,7 @@ class FileBrowser extends StatefulWidget {
 }
 
 class ViewerState extends State<FileBrowser> {
+  static final eventBus = GlobalEventBus.instance;
   static const int rowWidth = 330;
   List<MediaFile> files = [];
   String currentPath = '';
@@ -30,19 +34,26 @@ class ViewerState extends State<FileBrowser> {
   late TextStyle descStyle;
   bool onExit = false;
   final _scrollController = ScrollController();
+  Color _baseColor = Colors.green;
 
   @override
   void initState() {
     super.initState();
     loadConfig();
     initPath();
+
+    eventBus.on<SideBarTapEvent>().listen((event) {
+      scrollToTop();
+      initPath(event.path);
+    });
   }
 
   void loadConfig() {
-    descStyle = const TextStyle(
-        color: Color.fromRGBO(33, 33, 33, 0.5),
+    descStyle = TextStyle(
+        color: Color(int.parse(GlobalConfigs().get('descFontColor'), radix: 16)),
         fontSize: 12
     );
+    _baseColor = Colors.green;
   }
 
   void initPath([String params = '']) async {
@@ -52,8 +63,15 @@ class ViewerState extends State<FileBrowser> {
       files = fetchedFiles;
     });
 
+    setupFile();
+  }
+
+  setupFile() {
     final waitThumbFiles = files.where((f) => f.shouldHaveThumbnails);
     fetchThumb(waitThumbFiles);
+
+    final directories = files.where((f) => f.type == 'directory');
+    getDirectoryDetail(directories);
   }
 
   fetchThumb(Iterable<MediaFile> files) async {
@@ -65,6 +83,16 @@ class ViewerState extends State<FileBrowser> {
         setState(() {
           files.elementAt(i).thumbnailFile = newThumbFile;
         });
+      });
+    }
+  }
+
+  getDirectoryDetail(Iterable<MediaFile> files) {
+    for (var i = 0; i < files.length; ++i) {
+      files.elementAt(i).getFileCount().then((count) => {
+        setState(() {
+          files.elementAt(i).fileCount = count;
+        })
       });
     }
   }
@@ -104,7 +132,7 @@ class ViewerState extends State<FileBrowser> {
                                   children: [
                                     Padding(
                                         padding: const EdgeInsets.only(left: 5, right: 10),
-                                        child: setupThumbNailOrIcons(currentFile)),
+                                        child: setupThumbNailOrIcons(currentFile, _baseColor)),
                                     Expanded(
                                       child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,19 +141,8 @@ class ViewerState extends State<FileBrowser> {
                                               Text(p.basename(currentFile.path),
                                                   maxLines: 2,
                                                   overflow: TextOverflow.ellipsis),
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [Text(generateSizeDescription(currentFile.size),
-                                                    style: descStyle
-                                                ),
-                                                  Expanded(
-                                                    child: Align(
-                                                      alignment: Alignment.centerRight,
-                                                      child: Text(StringUtil.formatDate(currentFile.modified),
-                                                          style: descStyle))
-                                                )],
-                                              ),
-                                            const CustomUnderline()
+                                              generateSizeDescription(currentFile, context, descStyle),
+                                              const CustomUnderline()
                                           ]),
                                     )
                                   ])));
@@ -160,33 +177,37 @@ class ViewerState extends State<FileBrowser> {
         scrollToTop();
         files = fetchFiles;
         currentPath = parentPath;
+        setupFile();
       });
     });
     return true;
   }
 
-  static setupThumbNailOrIcons(MediaFile file) {
+  static setupThumbNailOrIcons(MediaFile file, Color baseColor) {
     const double iconSize = 50;
-    if (file.type == '') {
-      return const Icon(Icons.folder, size: iconSize + 4, color: Colors.green);
+    const padding = 4;
+    if (file.type == 'directory') {
+      return Icon(Icons.folder, size: iconSize + padding, color: baseColor);
     }
     if (file.shouldHaveThumbnails) {
       if (file.thumbnailFile == null) {
-        return const Icon(Icons.insert_drive_file,
-            size: 50, color: Colors.green);
+        return Icon(Icons.insert_drive_file,
+            size: 50, color: baseColor);
       } else {
-        return ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(iconSize / 2)),
-          child: Image.file(file.thumbnailFile!,
-              fit: BoxFit.cover, height: iconSize, width: iconSize),
+        return Container(
+          margin: EdgeInsets.only(left: padding.toDouble()),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.all(Radius.circular(iconSize / 2)),
+            child: Image.file(file.thumbnailFile!,
+              fit: BoxFit.cover, height: iconSize - padding, width: iconSize - padding)),
         );
       }
     } else {
       switch (file.type) {
         case '.mp4':
-          return const Icon(Icons.video_collection_outlined, size: iconSize);
+          return Icon(Icons.video_collection_outlined, size: iconSize, color: baseColor);
       }
-      return const Icon(Icons.insert_drive_file, size: iconSize + 4);
+      return Icon(Icons.insert_drive_file, size: iconSize + padding, color: baseColor);
     }
   }
 
@@ -215,19 +236,33 @@ class ViewerState extends State<FileBrowser> {
     }
   }
 
-  static String generateSizeDescription(int size) {
-    if (size == 0) {
-      return 'Directory';
-    }
-    if (size > 0 && size < 1024) {
-      return '$size Bytes';
+  static Row generateSizeDescription(MediaFile currentFile, BuildContext ctx, TextStyle textStyle) {
+    final size = currentFile.size;
+    String description = '';
+    if (currentFile.type == 'directory') {
+      description = AppLocalizations.of(ctx)!.empty;
+      if (currentFile.fileCount > 0) {
+        description = AppLocalizations.of(ctx)!.n_files(currentFile.fileCount);
+      }
+    } else if (size > 0 && size < 1024) {
+      description = '$size Bytes';
     } else if (size > 1024 && size < 1048576) {
-      return '${(size / 1024).toStringAsFixed(2)} KB';
+      description = '${(size / 1024).toStringAsFixed(2)} KB';
     } else if (size > 1048576 && size <  1024*1024*1024) {
-      return '${(size / 1048576).toStringAsFixed(2)} MB';
+      description = '${(size / 1048576).toStringAsFixed(2)} MB';
     } else {
-      return '${(size / 1073741824).toStringAsFixed(2)} GB';
+      description = '${(size / 1073741824).toStringAsFixed(2)} GB';
     }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [Text(description, style: textStyle),
+        Expanded(
+            child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(StringUtil.formatDate(currentFile.modified),
+                    style: textStyle))
+        )],
+    );
   }
 
   void scrollToTop() {

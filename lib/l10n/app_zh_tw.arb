@@ -2,5 +2,11 @@
     "helloWorld": "こんにちは、チヨ",
     "initializing": "初始化中...",
     "oneMoreClickToExit": "一秒内再次返回，可以退出本程序",
-    "noFiles": "没有文件！> <"
+    "noFiles": "没有文件！> <",
+    "n_files": "{count} 項",
+    "empty": "空",
+    "collection": "收藏夹",
+    "storageDevice": "Storage Devices",
+    "internalStorage": "Internal Storage",
+    "externalStorage": "External Storage"
 }

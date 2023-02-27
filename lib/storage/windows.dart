@@ -56,4 +56,9 @@ class WindowsStorage implements BaseStorage {
   Future<ResultType> openFile(String path) {
     return Future.value(ResultType.done);
   }
+
+  @override
+  String convertStoragePathForDisplay(String path) {
+    return path;
+  }
 }

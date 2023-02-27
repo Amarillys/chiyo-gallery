@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:toast/toast.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import 'package:chiyo_gallery/pages/browser.dart';
+import 'package:chiyo_gallery/components/sidebar.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -61,8 +63,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 Expanded(
                     flex: 2,
                     child: Container(
-                        color: Colors.green,
-                        child: Center(child: Text(locale!.helloWorld)))),
+                        // color: Colors.green,
+                        child: const SideBar())),
                 const Expanded(flex: 5, child: BrowserPage())
               ],
             );

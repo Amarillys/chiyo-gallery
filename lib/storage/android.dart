@@ -101,4 +101,13 @@ class AndroidStorage implements BaseStorage {
   Future<ResultType> openFile(String path) async {
     return (await OpenFile.open(path)).type;
   }
+
+  @override
+  String convertStoragePathForDisplay(String path) {
+    if (path == '/storage/emulated/0') {
+      return 'internalStorage';
+    } else {
+      return 'externalStorage';
+    }
+  }
 }

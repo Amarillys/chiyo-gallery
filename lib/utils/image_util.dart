@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:global_configs/global_configs.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path/path.dart' as path_util;
-
 
 import 'package:chiyo_gallery/components/file.dart';
 import 'package:chiyo_gallery/utils/avif_convert.dart';
@@ -50,5 +50,16 @@ class ImageUtil {
       File? thumbCache = await ImageUtil.getThumbFile(image.path);
       thumbCache ??= await ImageUtil.generateThumbnail(image.path);
       return Future.value(thumbCache);
+  }
+
+  static Color mapColorFromString(String colorStr) {
+    switch (colorStr) {
+      case 'blue':
+        return Colors.blue;
+      case 'pink':
+        return Colors.pink;
+      default:
+        return Colors.white;
+    }
   }
 }

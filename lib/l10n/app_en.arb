@@ -4,15 +4,28 @@
     "description": "The conventional newborn programmer greeting"
   },
   "initializing": "Initializing...",
-  "@helloWorld": {
+  "@initializing": {
     "description": "A normal waiting tips"
   },
   "oneMoreClickToExit": "Return again to exit...",
-  "@helloWorld": {
+  "@oneMoreClickToExit": {
     "description": "When return at root directory"
   },
   "noFiles": "No Files...> <",
   "@noFiles": {
     "description": "Tips show in empty folder."
-  }
+  },
+  "n_files": "{count} Items",
+  "@n_files": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "empty": "Empty",
+  "collection": "Collection",
+  "storageDevice": "Storage Devices",
+  "internalStorage": "Internal Storage",
+  "externalStorage": "External Storage"
 }
