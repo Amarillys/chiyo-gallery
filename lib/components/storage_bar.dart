@@ -59,12 +59,11 @@ class StorageBar extends StatelessWidget {
     return Container(
         margin: const EdgeInsets.all(10.0),
         child: Icon(icon,
-            color:
-                ImageUtil.mapColorFromString(GlobalConfigs().get('baseColor')),
+            color: ImageUtil.mapColorFromString(GlobalConfigs().get('baseColor')),
             size: 40));
   }
 
-  static setupStorageLabel(String path, BuildContext ctx) {
+  static String setupStorageLabel(String path, BuildContext ctx) {
     final locale = AppLocalizations.of(ctx);
     var convertedText = storage.convertStoragePathForDisplay(path);
     if (convertedText == 'internalStorage') {
@@ -72,7 +71,7 @@ class StorageBar extends StatelessWidget {
     } else if (convertedText == 'externalStorage') {
       return locale!.externalStorage;
     } else {
-      return path;
+      return convertedText;
     }
   }
 }

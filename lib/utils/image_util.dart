@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -39,33 +40,67 @@ class ImageUtil {
       if (Platform.isAndroid || Platform.isIOS) {
         thumbnailFiles = (await FlutterImageCompress.compressWithFile(filePath, minHeight: width, minWidth: width))!;
       } else {
-        final Map<String, Function(String)> decodeFunctionMap = {
-          '.bmp': img.decodeBmpFile,
-          '.gif': img.decodeGifFile,
-          '.jpeg': img.decodeJpgFile,
-          '.jpg': img.decodeJpgFile,
-          '.png': img.decodePngFile,
-          '.webp': img.decodeWebPFile,
-          '.tga': img.decodeTgaFile
-        };
-        final Function? decodeFunction = decodeFunctionMap[extension];
-        if (decodeFunction == null) {
-          return null;
-        }
+        if (extension == '.heic') {
+          final heicImageWidget = Image.file(File(filePath));
+          final imageStream = heicImageWidget.image.resolve(const ImageConfiguration());
 
-        img.Image thumbnailImage;
-        try {
-          thumbnailImage = await decodeFunction(filePath);
-          thumbnailFiles = encodeImageToJpgBytes(thumbnailImage, minSide: width);
-        } on Exception catch (e) {
-          Logger().e(e);
-          return null;
+          Uint8List bytes = Uint8List(0);
+          final completer = Completer<List<int>>();
+          int decodeWidth = 0, decodeHeight = 0;
+          final imageStreamListener = ImageStreamListener((imageInfo, synchronousCall) async {
+            final byteData = await imageInfo.image.toByteData(format: ImageByteFormat.rawRgba);
+            bytes = byteData!.buffer.asUint8List();
+            decodeWidth = imageInfo.image.width;
+            decodeHeight = imageInfo.image.height;
+            if (!completer.isCompleted) {
+              completer.complete(bytes);
+            }
+          });
+          imageStream.addListener(imageStreamListener);
+
+          await completer.future;
+          print(decodeWidth);
+          if (bytes.isEmpty) {
+            return null;
+          }
+
+          thumbnailFiles = encodeImageToJpgBytes(img.Image.fromBytes(
+              width: decodeWidth,
+              height: decodeHeight,
+              bytes: bytes.buffer,
+              numChannels: 4), minSide: 300, quality: 75);
+
+          imageStream.removeListener(imageStreamListener);
+        } else {
+          final Map<String, Function(String)> decodeFunctionMap = {
+            '.bmp': img.decodeBmpFile,
+            '.gif': img.decodeGifFile,
+            '.jpeg': img.decodeJpgFile,
+            '.jpg': img.decodeJpgFile,
+            '.png': img.decodePngFile,
+            '.webp': img.decodeWebPFile,
+            '.tga': img.decodeTgaFile
+          };
+          final Function? decodeFunction = decodeFunctionMap[extension];
+          if (decodeFunction == null) {
+            return null;
+          }
+
+          img.Image thumbnailImage;
+          try {
+            thumbnailImage = await decodeFunction(filePath);
+            thumbnailFiles = encodeImageToJpgBytes(thumbnailImage, minSide: width);
+          } on Exception catch (e) {
+            Logger().e(e);
+            return null;
+          }
         }
+        return DefaultCacheManager().putFile(
+            filePath, thumbnailFiles,
+            eTag: '${fileStat.size}-${fileStat.modified}');
       }
-      return DefaultCacheManager().putFile(
-          filePath, thumbnailFiles,
-          eTag: '${fileStat.size}-${fileStat.modified}');
     }
+    return null;
   }
 
   static bool isImageFile(String filePath) {
@@ -76,7 +111,6 @@ class ImageUtil {
   static Future<File?> getThumbFile(String imagePath) async {
     return (await DefaultCacheManager().getFileFromCache(imagePath))?.file;
   }
-
 
   static Future<File?> generateNormalThumbnails(MediaFile image) async {
       File? thumbCache = await ImageUtil.getThumbFile(image.path);

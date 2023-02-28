@@ -44,7 +44,7 @@ class WindowsStorage implements BaseStorage {
       } else if (a is File && b is Directory) {
         return 1;
       }
-      return a.path.compareTo(b.path);
+      return a.path.toUpperCase().compareTo(b.path.toUpperCase());
     });
     if (extensions.isEmpty) return fileList;
 
@@ -75,7 +75,7 @@ class WindowsStorage implements BaseStorage {
 
   @override
   String convertStoragePathForDisplay(String path) {
-    return path;
+    return path.toUpperCase();
   }
 
   List<String> detectAvailablePartition() {

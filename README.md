@@ -9,12 +9,12 @@ Support Information.
 
 |          | Android | Windows | Linux | iOS   | MacOS |
 | -------- | ------- | ------- | ----- | ----- | ----- |
-| Platform | WIP     | TO-DO   | TO-DO | TO-DO | TO-DO |
+| Platform | WIP     | WIP     | TO-DO | TO-DO | TO-DO |
 
 
 
 | Codec           | JPEG  | PNG   | WEBP  | HEIF  | AVIF  | BMP   |
 | --------------- | ----- | ----- | ----- | ----- | ----- | ----- |
-| Decode          | √     | √     | TO-DO | TO-DO | √     | TO-DO |
-| Convert(Encode) | TO-DO | TO-DO | TO-DO | TO-DO | TO-DO | TO-DO |
+| Decode          | √     | √     | TO-DO | √     | √     | TO-DO |
+| Convert(Encode) | √     | √     | TO-DO | TO-DO | TO-DO | TO-DO |
 

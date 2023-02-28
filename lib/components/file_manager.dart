@@ -75,7 +75,8 @@ class ViewerState extends State<FileBrowser> {
   }
 
   fetchThumb(Iterable<MediaFile> files) async {
-    final executor = Executor(concurrency: 3);
+    final generateThread = Platform.isWindows ? 3 : 2;
+    final executor = Executor(concurrency: generateThread);
     for (var i = 0; i < files.length; ++i) {
       executor.scheduleTask(() async {
         final newThumbFile =
@@ -242,6 +243,8 @@ class ViewerState extends State<FileBrowser> {
       if (currentFile.fileCount > 0) {
         description = AppLocalizations.of(ctx)!.n_files(currentFile.fileCount);
       }
+    } else if (size == 0) {
+      description = '0 B';
     } else if (size > 0 && size < 1024) {
       description = '$size Bytes';
     } else if (size > 1024 && size < 1048576) {
