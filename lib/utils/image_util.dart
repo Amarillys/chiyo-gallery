@@ -1,14 +1,19 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configs/global_configs.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter_avif/flutter_avif.dart';
+import 'package:logger/logger.dart';
+import "package:path/path.dart" as p;
+import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as path_util;
 
 import 'package:chiyo_gallery/components/file.dart';
-import 'package:chiyo_gallery/utils/avif_convert.dart';
 
 class ImageUtil {
   static final List<String> thumbnailExt = ['.jpg', '.png', '.avif', '.jfif', '.jpeg', '.heic', '.webp'];
@@ -21,15 +26,42 @@ class ImageUtil {
     return false;
   }
 
-  static Future<File> generateThumbnail(String filePath) async {
-    final width = int.parse(await GlobalConfigs().get('thumbnail-width'));
+  static Future<File?> generateThumbnail(String filePath) async {
+    final int width = int.parse(await GlobalConfigs().get('thumbnail-width'));
     final fileStat = await File(filePath).stat();
-    if (filePath.contains('.avif')) {
+    final extension = p.extension(filePath);
+    if (extension == '.avif') {
       return DefaultCacheManager().putFile(
-          filePath, await AvifConvertor.toJPG(filePath, minSide: width),
+          filePath, await ImageUtil.avifFileToJPG(filePath, minSide: width),
           eTag: '${fileStat.size}-${fileStat.modified}');
     } else {
-      final thumbnailFiles = (await FlutterImageCompress.compressWithFile(filePath, minHeight: width, minWidth: width))!;
+      Uint8List? thumbnailFiles;
+      if (Platform.isAndroid || Platform.isIOS) {
+        thumbnailFiles = (await FlutterImageCompress.compressWithFile(filePath, minHeight: width, minWidth: width))!;
+      } else {
+        final Map<String, Function(String)> decodeFunctionMap = {
+          '.bmp': img.decodeBmpFile,
+          '.gif': img.decodeGifFile,
+          '.jpeg': img.decodeJpgFile,
+          '.jpg': img.decodeJpgFile,
+          '.png': img.decodePngFile,
+          '.webp': img.decodeWebPFile,
+          '.tga': img.decodeTgaFile
+        };
+        final Function? decodeFunction = decodeFunctionMap[extension];
+        if (decodeFunction == null) {
+          return null;
+        }
+
+        img.Image thumbnailImage;
+        try {
+          thumbnailImage = await decodeFunction(filePath);
+          thumbnailFiles = encodeImageToJpgBytes(thumbnailImage, minSide: width);
+        } on Exception catch (e) {
+          Logger().e(e);
+          return null;
+        }
+      }
       return DefaultCacheManager().putFile(
           filePath, thumbnailFiles,
           eTag: '${fileStat.size}-${fileStat.modified}');
@@ -46,10 +78,10 @@ class ImageUtil {
   }
 
 
-  static Future<File> generateNormalThumbnails(MediaFile image) async {
+  static Future<File?> generateNormalThumbnails(MediaFile image) async {
       File? thumbCache = await ImageUtil.getThumbFile(image.path);
       thumbCache ??= await ImageUtil.generateThumbnail(image.path);
-      return Future.value(thumbCache);
+      return thumbCache;
   }
 
   static Color mapColorFromString(String colorStr) {
@@ -61,5 +93,63 @@ class ImageUtil {
       default:
         return Colors.white;
     }
+  }
+
+  static Future<Uint8List> avifFileToJPG(String srcPath,
+      {width = 0,
+        height = 0,
+        String dstPath = '',
+        int quality = 75,
+        int minSide = 0}) async {
+    const double hashScale = 1.0;
+    final hashCode = Object.hash(srcPath, hashScale);
+    final Uint8List bytes = await File(srcPath).readAsBytes();
+
+    final codec = AvifCodec(
+        key: hashCode,
+        avifBytes: bytes
+    );
+
+    await codec.ready();
+
+    final firstFrame = await codec.getNextFrame();
+    var originalWidth = firstFrame.image.width;
+    var originalHeight = firstFrame.image.height;
+    if (width == 0) {
+      width = originalWidth;
+    }
+    if (height == 0) {
+      height = originalHeight;
+    }
+    codec.dispose();
+    // TO-DO: optimize image size
+    final imageBytes =
+    (await firstFrame.image.toByteData(format: ImageByteFormat.rawRgba))!
+        .buffer
+        .asUint8List();
+    firstFrame.image.dispose();
+    final encodedImg = encodeImageToJpgBytes(img.Image.fromBytes(
+        width: originalWidth,
+        height: originalHeight,
+        bytes: imageBytes.buffer,
+        numChannels: 4), quality: quality);
+    if (dstPath != '') {
+      File(dstPath).writeAsBytes(encodedImg);
+    }
+    return Future.value(encodedImg);
+  }
+
+  static Uint8List encodeImageToJpgBytes(img.Image image, { int dstWidth = 0, int dstHeight = 0, int minSide = 0, int quality = 75 }) {
+    if (minSide > 0) {
+      if (image.width > image.height) {
+        dstHeight = minSide;
+        dstWidth = (minSide * (image.width / image.height)).toInt();
+      } else {
+        dstWidth = minSide;
+        dstHeight = (minSide * (image.height / image.width)).toInt();
+      }
+    }
+    final resizedImg =  img.copyResize(image, width: dstWidth == 0 ? image.width : dstWidth, height: dstHeight == 0 ? image.height : dstHeight);
+    return img.encodeJpg(resizedImg, quality: quality);
   }
 }

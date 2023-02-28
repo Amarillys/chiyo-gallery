@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:path/path.dart' as path_util;
+import 'package:logger/logger.dart';
 
-import '../utils/image_util.dart';
+import 'package:chiyo_gallery/utils/image_util.dart';
 
 class MediaFile {
   late File file;
@@ -31,7 +32,9 @@ class MediaFile {
 
   Future<int> getFileCount() async {
     if (type == 'directory') {
-      await for (var entity in Directory(path).list()) {
+      var stream =  Directory(path).list().handleError((err) => Logger().w('cannot access: $err'),
+         test: (e) => e is FileSystemException);
+      await for (var entity in stream) {
         fileCount++;
       }
       return fileCount;

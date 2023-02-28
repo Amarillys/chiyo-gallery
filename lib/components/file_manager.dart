@@ -80,9 +80,11 @@ class ViewerState extends State<FileBrowser> {
       executor.scheduleTask(() async {
         final newThumbFile =
             await ImageUtil.generateNormalThumbnails(files.elementAt(i));
-        setState(() {
-          files.elementAt(i).thumbnailFile = newThumbFile;
-        });
+        if (newThumbFile != null) {
+          setState(() {
+            files.elementAt(i).thumbnailFile = newThumbFile;
+          });
+        }
       });
     }
   }
@@ -262,10 +264,12 @@ class ViewerState extends State<FileBrowser> {
   }
 
   void scrollToTop() {
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(microseconds: 1),
-      curve: Curves.bounceIn
-    );
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(microseconds: 1),
+        curve: Curves.bounceIn
+      );
+    }
   }
 }

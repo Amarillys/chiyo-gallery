@@ -1,6 +1,7 @@
 import "dart:io";
 import 'package:open_file/open_file.dart';
 import "package:path/path.dart" as p;
+import 'package:logger/logger.dart';
 
 import "base.dart";
 
@@ -19,6 +20,7 @@ class WindowsStorage implements BaseStorage {
 
   @override
   Future<bool> grantPermission() async {
+    externalStoragePath = detectAvailablePartition();
     return true;
   }
 
@@ -29,7 +31,21 @@ class WindowsStorage implements BaseStorage {
       throw FileSystemException ('folder does not exist', folderPath);
     }
 
-    List<FileSystemEntity> fileList = await folder.list(recursive: true).toList();
+    List<FileSystemEntity> fileList = [];
+    var stream = folder.list(recursive: false)
+      .handleError((err) => Logger().w('cannot access: $err'), test: (e) => e is FileSystemException);
+    
+    await for (var entity in stream) {
+      fileList.add(entity);
+    }
+    fileList.sort((a, b) {
+      if (a is Directory && b is File) {
+        return -1;
+      } else if (a is File && b is Directory) {
+        return 1;
+      }
+      return a.path.compareTo(b.path);
+    });
     if (extensions.isEmpty) return fileList;
 
     return fileList.where((file) {
@@ -60,5 +76,18 @@ class WindowsStorage implements BaseStorage {
   @override
   String convertStoragePathForDisplay(String path) {
     return path;
+  }
+
+  List<String> detectAvailablePartition() {
+    final List<String> partitions = [];
+    final List<String> diskSignal = List.generate(26, (index) => String.fromCharCode('a'.codeUnitAt(0) + index));
+    for (var i = 0; i < diskSignal.length; ++i) {
+      final partitionPath = '${diskSignal[i]}:/';
+      final partition = Directory(partitionPath);
+      if (partition.existsSync()) {
+        partitions.add(partitionPath);
+      }
+    }
+    return partitions;
   }
 }

@@ -71,6 +71,8 @@ class StorageBar extends StatelessWidget {
       return locale!.internalStorage;
     } else if (convertedText == 'externalStorage') {
       return locale!.externalStorage;
+    } else {
+      return path;
     }
   }
 }
