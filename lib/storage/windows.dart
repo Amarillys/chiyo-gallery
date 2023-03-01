@@ -1,4 +1,5 @@
 import "dart:io";
+import "dart:core";
 import 'package:open_file/open_file.dart';
 import "package:path/path.dart" as p;
 import 'package:logger/logger.dart';
@@ -13,9 +14,12 @@ class WindowsStorage implements BaseStorage {
   String initStoragePath = 'c:/';
   @override
   List<String> cannotAccessPath = [];
+  
+  List<RegExp> filterRules = [];
 
   WindowsStorage() {
     grantPermission();
+    filterRules = [RegExp(r"\.tmp"), RegExp(r"\.sys")];
   }
 
   @override
@@ -36,7 +40,15 @@ class WindowsStorage implements BaseStorage {
       .handleError((err) => Logger().w('cannot access: $err'), test: (e) => e is FileSystemException);
     
     await for (var entity in stream) {
-      fileList.add(entity);
+      var allow = true;
+      for (var reg in filterRules) {
+        if (reg.hasMatch(entity.path)) {
+          allow = false;
+        }
+      }
+      if (allow) {
+        fileList.add(entity);
+      }
     }
     fileList.sort((a, b) {
       if (a is Directory && b is File) {

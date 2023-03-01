@@ -29,12 +29,15 @@ class ViewerState extends State<FileBrowser> {
   static final eventBus = GlobalEventBus.instance;
   static const int rowWidth = 330;
   List<MediaFile> files = [];
+  List<String> histories = [""];
+  bool historyBacking = false;
   String currentPath = '';
   String sortType = 'normal';
   late TextStyle descStyle;
   bool onExit = false;
   final _scrollController = ScrollController();
   Color _baseColor = Colors.green;
+  bool showEmptyFile = false;
 
   @override
   void initState() {
@@ -42,8 +45,18 @@ class ViewerState extends State<FileBrowser> {
     loadConfig();
     initPath();
 
-    eventBus.on<SideBarTapEvent>().listen((event) {
+    eventBus.on<ChangePathEvent>().listen((event) {
       initPath(event.path);
+    });
+
+    eventBus.on<PathBackEvent>().listen((event) {
+      if (histories.length == 1) {
+        return;
+      } else {
+        final backPath = histories.removeLast();
+        historyBacking = true;
+        initPath(backPath);
+      }
     });
   }
 
@@ -56,12 +69,21 @@ class ViewerState extends State<FileBrowser> {
   }
 
   void initPath([String params = '']) async {
-    final fetchedFiles =
+    var fetchedFiles =
         await widget.controller.fetchFile(params: params, sortType: sortType);
+    if (!showEmptyFile) {
+      fetchedFiles = fetchedFiles.where((file) => file.type == 'directory' || file.size > 0).toList();
+    }
     setState(() {
       files = fetchedFiles;
     });
-
+    if (historyBacking) {
+      historyBacking = false;
+    } else {
+      histories.add(currentPath);
+    }
+    currentPath = params;
+    eventBus.fire(PathChangedEvent(params));
     setupFile();
   }
 
@@ -171,14 +193,8 @@ class ViewerState extends State<FileBrowser> {
       });
       return true;
     }
-    widget.controller.fetchFile(params: parentPath).then((fetchFiles) {
-      setState(() {
-        scrollToTop();
-        files = fetchFiles;
-        currentPath = parentPath;
-        setupFile();
-      });
-    });
+    scrollToTop();
+    initPath(parentPath);
     return true;
   }
 
@@ -230,8 +246,7 @@ class ViewerState extends State<FileBrowser> {
         FileController.storage.openFile(currentFile.path);
       }
     } else {
-      currentPath = '${currentFile.path}/';
-      initPath(currentPath);
+      initPath('${currentFile.path}/');
     }
   }
 

@@ -72,7 +72,7 @@ class ImageUtil {
 
           imageStream.removeListener(imageStreamListener);
         } else {
-          final Map<String, Function(String)> decodeFunctionMap = {
+          final Map<String, Future<img.Image?> Function(String)> decodeFunctionMap = {
             '.bmp': img.decodeBmpFile,
             '.gif': img.decodeGifFile,
             '.jpeg': img.decodeJpgFile,
@@ -86,10 +86,15 @@ class ImageUtil {
             return null;
           }
 
-          img.Image thumbnailImage;
+          img.Image? thumbnailImage;
           try {
             thumbnailImage = await decodeFunction(filePath);
-            thumbnailFiles = encodeImageToJpgBytes(thumbnailImage, minSide: width);
+            thumbnailImage ??= await img.decodeImageFile(filePath);
+            if (thumbnailImage != null) {
+              thumbnailFiles = encodeImageToJpgBytes(thumbnailImage, minSide: width);
+            } else {
+              return null;
+            }
           } on Exception catch (e) {
             Logger().e(e);
             return null;
