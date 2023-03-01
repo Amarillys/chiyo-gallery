@@ -27,7 +27,7 @@ class FileBrowser extends StatefulWidget {
 
 class ViewerState extends State<FileBrowser> {
   static final eventBus = GlobalEventBus.instance;
-  static const int rowWidth = 330;
+  static const int rowWidth = 300;
   List<MediaFile> files = [];
   List<String> histories = [""];
   List<int> selected = [];
@@ -39,6 +39,7 @@ class ViewerState extends State<FileBrowser> {
   final _scrollController = ScrollController();
   Color _baseColor = Colors.green;
   bool showEmptyFile = false;
+  Executor executor = Executor(concurrency: 2);
 
   @override
   void initState() {
@@ -70,6 +71,9 @@ class ViewerState extends State<FileBrowser> {
   }
 
   void initPath([String params = '']) async {
+    if (executor.waitingCount > 0) {
+      executor.close();
+    }
     var fetchedFiles =
         await widget.controller.fetchFile(params: params, sortType: sortType);
     if (!showEmptyFile) {
@@ -99,8 +103,7 @@ class ViewerState extends State<FileBrowser> {
   }
 
   fetchThumb(Iterable<MediaFile> files) async {
-    final generateThread = Platform.isWindows ? 3 : 2;
-    final executor = Executor(concurrency: generateThread);
+    executor = Executor(concurrency: 2);
     for (var i = 0; i < files.length; ++i) {
       executor.scheduleTask(() async {
         final newThumbFile =

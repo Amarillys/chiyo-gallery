@@ -110,4 +110,9 @@ class AndroidStorage implements BaseStorage {
       return 'externalStorage';
     }
   }
+
+  @override
+  String dealPrefixPath(String firstPath) {
+    return firstPath;
+  }
 }

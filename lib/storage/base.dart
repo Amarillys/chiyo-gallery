@@ -18,4 +18,6 @@ abstract class BaseStorage {
   Future<ResultType> openFile(String path);
 
   String convertStoragePathForDisplay(String path);
+
+  String dealPrefixPath(String firstPath);
 }

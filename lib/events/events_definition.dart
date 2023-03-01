@@ -25,3 +25,7 @@ class ItemChooseEvent {
   List<String> paths;
   ItemChooseEvent(this.itemIndexes, this.paths);
 }
+
+class CloseDrawerEvent {
+  CloseDrawerEvent();
+}

@@ -44,6 +44,7 @@ class StorageBar extends StatelessWidget {
 
   onItemTap(String path) {
     eventBus.fire(ChangePathEvent(path));
+    eventBus.fire(CloseDrawerEvent());
   }
 
   static Widget setupIconByType(int index) {

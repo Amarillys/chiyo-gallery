@@ -8,5 +8,6 @@
     "collection": "收藏夹",
     "storageDevice": "存储设备",
     "internalStorage": "手机存储",
-    "externalStorage": "外部存储"
+    "externalStorage": "外部存储",
+    "addToCollection": "添加到收藏夹"
 }

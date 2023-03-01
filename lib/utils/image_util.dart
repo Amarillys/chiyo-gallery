@@ -59,7 +59,6 @@ class ImageUtil {
           imageStream.addListener(imageStreamListener);
 
           await completer.future;
-          print(decodeWidth);
           if (bytes.isEmpty) {
             return null;
           }
@@ -100,10 +99,10 @@ class ImageUtil {
             return null;
           }
         }
-        return DefaultCacheManager().putFile(
-            filePath, thumbnailFiles,
-            eTag: '${fileStat.size}-${fileStat.modified}');
       }
+      return DefaultCacheManager().putFile(
+          filePath, thumbnailFiles,
+          eTag: '${fileStat.size}-${fileStat.modified}');
     }
     return null;
   }

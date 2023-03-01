@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_avif/flutter_avif.dart';
+import 'package:photo_view/photo_view.dart';
 
 class FullScreenViewer extends StatefulWidget {
   final String imagePath;
@@ -13,17 +14,19 @@ class FullScreenViewer extends StatefulWidget {
 class FullScreenViewerState extends State<FullScreenViewer> {
   @override
   Widget build(BuildContext context) {
-    StatefulWidget imageWidget;
+    ImageProvider imageWidget;
     if (widget.imagePath.contains('.avif')) {
-      imageWidget = AvifImage.file(File(widget.imagePath), fit: BoxFit.contain);
+      imageWidget = AvifImage.file(File(widget.imagePath), fit: BoxFit.contain).image;
     } else {
-      imageWidget = Image.file(File(widget.imagePath), fit: BoxFit.contain);
+      imageWidget = Image.file(File(widget.imagePath), fit: BoxFit.contain).image;
     }
     return Scaffold(
         body: Stack(
-        children: [
-          Positioned.fill(child: imageWidget)
-      ],
-    ));
+          children: [
+            Positioned.fill(child:
+              PhotoView(imageProvider: imageWidget)
+            )
+          ]
+        ));
   }
 }

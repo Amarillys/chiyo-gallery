@@ -2,6 +2,7 @@ import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:global_configs/global_configs.dart';
+import 'package:path/path.dart' as p;
 
 import 'package:chiyo_gallery/events/eventbus.dart';
 import 'package:chiyo_gallery/events/events_definition.dart';
@@ -58,7 +59,7 @@ class _CollectionBarState extends State<CollectionBar> {
                 margin: const EdgeInsets.all(10),
                 child: Icon(Icons.folder_special, size: 40,
                     color: ImageUtil.mapColorFromString(GlobalConfigs().get('baseColor')))),
-            Text(collections[i])
+            Text(p.basename(collections[i]))
           ])
       ));
     }

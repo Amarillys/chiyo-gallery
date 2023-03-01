@@ -8,5 +8,6 @@
     "collection": "收藏夹",
     "storageDevice": "Storage Devices",
     "internalStorage": "Internal Storage",
-    "externalStorage": "External Storage"
+    "externalStorage": "External Storage",
+     "addToCollection": "添加到收藏夾"
 }

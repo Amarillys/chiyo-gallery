@@ -13,6 +13,8 @@ class ViewerPage extends StatefulWidget {
 class ViewerState extends State<ViewerPage> {
   String imagePath = '';
   int currentIndex = 0;
+  Color buttonBg = const Color.fromRGBO(100, 100, 100, 0.55);
+  static const iconColor = Color.fromRGBO(233, 233, 233, 0.95);
 
   @override
   void initState() {
@@ -23,6 +25,7 @@ class ViewerState extends State<ViewerPage> {
 
   @override
   Widget build(BuildContext context) {
+    const radius = BorderRadius.all(Radius.circular(20));
     return Scaffold(
       body: Stack(
         children: [
@@ -30,26 +33,44 @@ class ViewerState extends State<ViewerPage> {
             child: FullScreenViewer(imagePath: imagePath)
           ),
           Positioned(
-            top: 50,
-            left: 10,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.pop(context))
+              top: 30,
+              left: 30,
+              child: Material(
+                  color: Colors.transparent,
+                  child: ClipRRect(
+                    borderRadius: radius,
+                    child: InkWell(
+                        borderRadius: radius,
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                            padding: const EdgeInsets.all(10),
+                            color: const Color.fromRGBO(135, 135, 135, 1),
+                            child:const Icon(Icons.arrow_back, size: 28, color: Colors.white)
+                  ))))
           ),
-          Positioned(
-            top: 650,
-            left: 500,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_left, size: 80, color: Colors.black54),
-              onPressed: () => prevPicture())
-          ),
-          Positioned(
-            top: 650,
-            left: 650,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_right, size: 80,  color: Colors.black54),
-              onPressed: () => nextPicture())
-          )],
+          Container(
+            margin: const EdgeInsets.only(bottom: 15),
+            child: Align(
+              alignment: FractionalOffset.bottomCenter,
+              child: Material(
+                color: Colors.transparent,
+                child:ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(20)),
+                  child: Container(
+                    width: 300,
+                    height: 60,
+                    color: buttonBg,
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          setupActionIcon(Icons.arrow_back_ios_sharp, prevPicture),
+                          setupActionIcon(Icons.arrow_forward_ios_sharp, nextPicture),
+                        ],
+                      )
+                    ),
+                  ),
+            )),
+          )]
       )
     );
   }
@@ -76,5 +97,14 @@ class ViewerState extends State<ViewerPage> {
     });
   }
 
-
+  setupActionIcon(IconData icon, VoidCallback callback) {
+    return SizedBox(
+        width: 60,
+        height: 60,
+        child: InkWell(
+          onTap: callback,
+          child: Icon(icon, color: iconColor),
+        )
+    );
+  }
 }

@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import 'package:chiyo_gallery/events/eventbus.dart';
 import 'package:chiyo_gallery/events/events_definition.dart';
-import 'package:flutter/material.dart';
 
 class ContextMenu extends StatefulWidget {
   const ContextMenu({super.key});
@@ -24,9 +26,9 @@ class _ContextMenuState extends State<ContextMenu> {
       if (event.itemIndexes.length == 1) {
         setState(() {
           options = <PopupMenuEntry>[
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'add_collection',
-              child: Text('添加到收藏夹'),
+              child: Text(AppLocalizations.of(context)!.addToCollection),
             ),
             const PopupMenuItem(
               value: 'move',

@@ -8,5 +8,6 @@
     "collection": "コレクション",
     "storageDevice": "Storage Devices",
     "internalStorage": "Internal Storage",
-    "externalStorage": "External Storage"
+    "externalStorage": "External Storage",
+    "addToCollection": "Add to Collections"
 }

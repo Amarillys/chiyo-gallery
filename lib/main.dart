@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:global_configs/global_configs.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import './storage/storage.dart';
-import './pages/main.dart';
+import 'package:chiyo_gallery/storage/storage.dart';
+import 'package:chiyo_gallery/pages/main.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();

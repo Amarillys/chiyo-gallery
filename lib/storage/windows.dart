@@ -102,4 +102,13 @@ class WindowsStorage implements BaseStorage {
     }
     return partitions;
   }
+
+  @override
+  String dealPrefixPath(String firstPath) {
+    final partitionSignalReg = RegExp(r'^\w:\/$');
+    if (partitionSignalReg.hasMatch(firstPath)) {
+      return firstPath.substring(0, 2).toUpperCase();
+    }
+    return firstPath;
+  }
 }
