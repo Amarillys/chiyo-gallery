@@ -30,6 +30,7 @@ class ViewerState extends State<FileBrowser> {
   static const int rowWidth = 330;
   List<MediaFile> files = [];
   List<String> histories = [""];
+  List<int> selected = [];
   bool historyBacking = false;
   String currentPath = '';
   String sortType = 'normal';
@@ -84,6 +85,7 @@ class ViewerState extends State<FileBrowser> {
     }
     currentPath = params;
     eventBus.fire(PathChangedEvent(params));
+    selected = [];
     setupFile();
   }
 
@@ -137,15 +139,17 @@ class ViewerState extends State<FileBrowser> {
                   controller: _scrollController,
                   child: LayoutGrid(
                     columnGap: 10,
-                    rowGap: -12,
                     columnSizes: List.generate(columnCount, (index) => 1.fr),
-                    rowSizes: List.generate(rowCount, (index) => const FixedTrackSize(80)),
+                    rowSizes: List.generate(rowCount, (index) => const FixedTrackSize(70)),
                     children: List.generate(files.length, (index) {
                       final currentFile = files[index];
-                      return GestureDetector(
+                      bool isSelected = selected.contains(index);
+                      return InkWell(
                           onTap: () { onItemTap(currentFile); },
+                          onLongPress: () { onItemLongPress(currentFile, index); },
                           child: Card(
-                              color: const Color.fromRGBO(250, 250, 250, 0.3),
+                              margin: const EdgeInsets.only(top: 0, bottom: 0),
+                              color: isSelected ? const Color.fromRGBO(180, 180, 180, 0.4) : const Color.fromRGBO(250, 250, 250, 0.3),
                               elevation: 0,
                               child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -248,6 +252,19 @@ class ViewerState extends State<FileBrowser> {
     } else {
       initPath('${currentFile.path}/');
     }
+  }
+
+  onItemLongPress(MediaFile currentFile, int index) {
+    if (selected.contains(index)) {
+      setState(() {
+        selected.remove(index);
+      });
+    } else {
+      setState(() {
+        selected.add(index);
+      });
+    }
+    eventBus.fire(ItemChooseEvent(selected, files.map((e) => e.path).toList()));
   }
 
   static Row generateSizeDescription(MediaFile currentFile, BuildContext ctx, TextStyle textStyle) {

@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 
 import 'package:chiyo_gallery/pages/browser.dart';
 import 'package:chiyo_gallery/components/sidebar.dart';
+import 'package:chiyo_gallery/components/menu.dart';
 import 'package:chiyo_gallery/events/eventbus.dart';
 import 'package:chiyo_gallery/events/events_definition.dart';
 
@@ -51,10 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   icon: const Icon(Icons.search),
                   onPressed: () {},
                 ),
-                IconButton(
-                  icon: const Icon(Icons.more_vert),
-                  onPressed: () {},
-                )],
+                const ContextMenu()]
             ),
             body: isPortrait ?
                 Row(children: const <Widget>[Expanded(flex: 1, child: BrowserPage())])

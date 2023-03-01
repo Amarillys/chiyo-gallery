@@ -13,3 +13,15 @@ class PathChangedEvent {
 class PathBackEvent {
   PathBackEvent();
 }
+
+class AddCollectionEvent {
+  String collectionPath;
+
+  AddCollectionEvent(this.collectionPath);
+}
+
+class ItemChooseEvent {
+  List<int> itemIndexes;
+  List<String> paths;
+  ItemChooseEvent(this.itemIndexes, this.paths);
+}
