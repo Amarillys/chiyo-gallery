@@ -103,7 +103,9 @@ class _TitleBarState extends State<TitleBar> {
     eventBus.on<PathChangedEvent>().listen((event) {
       setState(() {
         paths = p.split(event.path);
-        paths[0] = storage.dealPrefixPath(paths[0]);
+        if (paths.length > 0) {
+          paths[0] = storage.dealPrefixPath(paths[0]);
+        }
       });
     });
   }
@@ -129,7 +131,7 @@ class _TitleBarState extends State<TitleBar> {
         },
         child: Container(
           margin: margin,
-          child: Text(StringUtil.cutString(paths[i], 9), style: TextStyle(fontSize: fontSize)),
+          child: Text(StringUtil.cutString(paths[i], 7), style: TextStyle(fontSize: fontSize)),
         )
       ));
       if (i < paths.length - 1) {

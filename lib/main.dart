@@ -1,5 +1,6 @@
+import 'package:chiyo_gallery/utils/config.dart';
 import 'package:flutter/material.dart';
-import 'package:global_configs/global_configs.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:chiyo_gallery/storage/storage.dart';
@@ -15,13 +16,13 @@ class ChiyoGallery extends StatelessWidget {
   const ChiyoGallery({super.key});
 
   static final storage = Storage.instance;
-  static final Future<GlobalConfigs> _config = init();
+  static final Future<bool> _init = init();
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _config,
+        future: _init,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return MaterialApp(
@@ -40,10 +41,11 @@ class ChiyoGallery extends StatelessWidget {
         });
   }
 
-  static Future<GlobalConfigs> init() async {
+  static Future<bool> init() async {
+    final appDataDirectoryPath = await getApplicationDocumentsDirectory();
+    GlobalConfig(appDataDirectoryPath.path);
     await storage.grantPermission();
-    final config = await GlobalConfigs().loadJsonFromdir('assets/configs/dev.json');
     FlutterNativeSplash.remove();
-    return config;
+    return true;
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:global_configs/global_configs.dart';
 
 import 'package:chiyo_gallery/components/storage_bar.dart';
 import 'package:chiyo_gallery/components/collection.dart';

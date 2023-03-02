@@ -1,7 +1,6 @@
 import 'dart:io';
 
-import 'package:global_configs/global_configs.dart';
-
+import 'package:chiyo_gallery/utils/config.dart';
 import 'package:chiyo_gallery/controller/file/base.dart';
 import 'package:chiyo_gallery/components/file.dart';
 
@@ -17,7 +16,7 @@ class StorageFileController implements FileController {
     }
     permissionGranted = true;
     if (path == '') {
-      path = GlobalConfigs().get('initPath');
+      path = GlobalConfig.get(ConfigMap.initPath) as String;
       if (path == '') {
         path = FileController.storage.initStoragePath;
       }

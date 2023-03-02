@@ -1,12 +1,12 @@
+import 'dart:async';
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:global_configs/global_configs.dart';
 import 'package:path/path.dart' as p;
 
 import 'package:chiyo_gallery/events/eventbus.dart';
 import 'package:chiyo_gallery/events/events_definition.dart';
-import 'package:chiyo_gallery/utils/config_map.dart';
+import 'package:chiyo_gallery/utils/config.dart';
 import 'package:chiyo_gallery/utils/image_util.dart';
 
 class CollectionBar extends StatefulWidget {
@@ -19,23 +19,22 @@ class CollectionBar extends StatefulWidget {
 class _CollectionBarState extends State<CollectionBar> {
   late List<String> collections = [];
   static final eventBus = GlobalEventBus.instance;
+  late StreamSubscription _addCollectionListener;
 
   @override
   void initState() {
     super.initState();
-    collections = List<String>.from(GlobalConfigs().get(ConfigMap.collections));
+    collections = List<String>.from(GlobalConfig.get(ConfigMap.collections));
 
-    eventBus.on<AddCollectionEvent>().listen((event) {
+    _addCollectionListener = eventBus.on<AddCollectionEvent>().listen((event) {
       setState(() {
         collections.add(event.collectionPath);
       });
-      GlobalConfigs().set(ConfigMap.collections, collections);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return ListTileTheme(
         contentPadding: const EdgeInsets.only(left: 15),
         dense: true,
@@ -58,11 +57,17 @@ class _CollectionBarState extends State<CollectionBar> {
             Container(
                 margin: const EdgeInsets.all(10),
                 child: Icon(Icons.folder_special, size: 40,
-                    color: ImageUtil.mapColorFromString(GlobalConfigs().get('baseColor')))),
+                    color: ImageUtil.mapColorFromString(GlobalConfig.get(ConfigMap.baseColor)))),
             Text(p.basename(collections[i]))
           ])
       ));
     }
     return items;
+  }
+
+  @override
+  void dispose() {
+    _addCollectionListener.cancel();
+    super.dispose();
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:global_configs/global_configs.dart';
 import "package:path/path.dart" as p;
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:executor/executor.dart';
@@ -15,6 +14,7 @@ import 'package:chiyo_gallery/controller/file/base.dart';
 import 'package:chiyo_gallery/pages/viewer.dart';
 import 'package:chiyo_gallery/utils/image_util.dart';
 import 'package:chiyo_gallery/components/underline.dart';
+import 'package:chiyo_gallery/utils/config.dart';
 
 class FileBrowser extends StatefulWidget {
   final FileController controller;
@@ -64,7 +64,7 @@ class ViewerState extends State<FileBrowser> {
 
   void loadConfig() {
     descStyle = TextStyle(
-        color: Color(int.parse(GlobalConfigs().get('descFontColor'), radix: 16)),
+        color: Color(int.parse(GlobalConfig.get(ConfigMap.descFontColor), radix: 16)),
         fontSize: 12
     );
     _baseColor = Colors.green;
@@ -89,6 +89,7 @@ class ViewerState extends State<FileBrowser> {
     }
     currentPath = params;
     eventBus.fire(PathChangedEvent(params));
+    eventBus.fire(ClearItemChooseEvent());
     selected = [];
     setupFile();
   }

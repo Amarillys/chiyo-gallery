@@ -20,6 +20,10 @@ class AddCollectionEvent {
   AddCollectionEvent(this.collectionPath);
 }
 
+class ClearItemChooseEvent {
+  ClearItemChooseEvent();
+}
+
 class ItemChooseEvent {
   List<int> itemIndexes;
   List<String> paths;

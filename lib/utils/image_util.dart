@@ -5,7 +5,6 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:global_configs/global_configs.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_avif/flutter_avif.dart';
@@ -15,6 +14,7 @@ import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as path_util;
 
 import 'package:chiyo_gallery/components/file.dart';
+import 'package:chiyo_gallery/utils/config.dart';
 
 class ImageUtil {
   static final List<String> thumbnailExt = ['.jpg', '.png', '.avif', '.jfif', '.jpeg', '.heic', '.webp'];
@@ -28,7 +28,7 @@ class ImageUtil {
   }
 
   static Future<File?> generateThumbnail(String filePath) async {
-    final int width = int.parse(await GlobalConfigs().get('thumbnail-width'));
+    final int width = int.parse(await GlobalConfig.get(ConfigMap.thumbnailWidth));
     final fileStat = await File(filePath).stat();
     final extension = p.extension(filePath);
     if (extension == '.avif') {

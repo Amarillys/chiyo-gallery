@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:chiyo_gallery/storage/storage.dart';
-import 'package:global_configs/global_configs.dart';
+import 'package:chiyo_gallery/utils/config.dart';
 
 class StorageBar extends StatelessWidget {
   const StorageBar({super.key});
@@ -60,7 +60,7 @@ class StorageBar extends StatelessWidget {
     return Container(
         margin: const EdgeInsets.all(10.0),
         child: Icon(icon,
-            color: ImageUtil.mapColorFromString(GlobalConfigs().get('baseColor')),
+            color: ImageUtil.mapColorFromString(GlobalConfig.get(ConfigMap.baseColor)),
             size: 40));
   }
 
