@@ -52,7 +52,10 @@ class _CollectionBarState extends State<CollectionBar> {
     List<Widget> items = [];
     for (var i = 0; i < collections.length; ++i) {
       items.add(InkWell(
-          onTap: () { eventBus.fire(ChangePathEvent(collections[i])); },
+          onTap: () {
+            eventBus.fire(ChangePathEvent(collections[i]));
+            eventBus.fire(CloseDrawerEvent());
+          },
           child: Row(children: [
             Container(
                 margin: const EdgeInsets.all(10),

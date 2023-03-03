@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import "package:path/path.dart" as p;
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
-import 'package:executor/executor.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:toast/toast.dart';
 
@@ -39,11 +38,12 @@ class ViewerState extends State<FileBrowser> {
   final _scrollController = ScrollController();
   Color _baseColor = Colors.green;
   bool showEmptyFile = false;
-  Executor executor = Executor(concurrency: 2);
+  bool waitForIsolate = true;
 
   @override
   void initState() {
     super.initState();
+
     loadConfig();
     initPath();
 
@@ -60,6 +60,7 @@ class ViewerState extends State<FileBrowser> {
         initPath(backPath);
       }
     });
+
   }
 
   void loadConfig() {
@@ -71,9 +72,6 @@ class ViewerState extends State<FileBrowser> {
   }
 
   void initPath([String params = '']) async {
-    if (executor.waitingCount > 0) {
-      executor.close();
-    }
     var fetchedFiles =
         await widget.controller.fetchFile(params: params, sortType: sortType);
     if (!showEmptyFile) {
@@ -91,6 +89,10 @@ class ViewerState extends State<FileBrowser> {
     eventBus.fire(PathChangedEvent(params));
     eventBus.fire(ClearItemChooseEvent());
     selected = [];
+    if (waitForIsolate) {
+      await Future.delayed(const Duration(seconds: 1));
+      waitForIsolate = false;
+    }
     setupFile();
   }
 
@@ -103,12 +105,12 @@ class ViewerState extends State<FileBrowser> {
     getDirectoryDetail(directories);
   }
 
-  fetchThumb(Iterable<MediaFile> files) async {
-    executor = Executor(concurrency: 2);
+  void fetchThumb(Iterable<MediaFile> files) async {
+    if (files.isEmpty) {
+      return;
+    }
     for (var i = 0; i < files.length; ++i) {
-      executor.scheduleTask(() async {
-        final newThumbFile =
-            await ImageUtil.generateNormalThumbnails(files.elementAt(i));
+      ImageUtil.generateNormalThumbnails(files.elementAt(i)).then((newThumbFile) {
         if (newThumbFile != null) {
           setState(() {
             files.elementAt(i).thumbnailFile = newThumbFile;

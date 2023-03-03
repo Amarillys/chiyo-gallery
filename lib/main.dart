@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:chiyo_gallery/utils/config.dart';
+import 'package:chiyo_gallery/utils/task_queue.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -44,6 +47,11 @@ class ChiyoGallery extends StatelessWidget {
   static Future<bool> init() async {
     final appDataDirectoryPath = await getApplicationDocumentsDirectory();
     GlobalConfig(appDataDirectoryPath.path);
+    if (Platform.isAndroid || Platform.isIOS) {
+      TaskQueue(2);
+    } else {
+      TaskQueue(4);
+    }
     await storage.grantPermission();
     FlutterNativeSplash.remove();
     return true;

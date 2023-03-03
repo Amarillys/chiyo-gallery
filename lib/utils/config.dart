@@ -15,7 +15,6 @@ class GlobalConfig {
   static Map<String, dynamic>? _data;
   static GlobalConfig? _instance;
 
-
   factory GlobalConfig(String appDataPath) {
     _instance ??= GlobalConfig._internal(appDataPath);
     _dataPath = '$appDataPath/chiyo-gallery.config.json';
