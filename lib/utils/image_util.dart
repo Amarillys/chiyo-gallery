@@ -239,7 +239,8 @@ class ImageUtil {
         dstHeight = (minSide * (image.height / image.width)).toInt();
       }
     }
-    final resizedImg = img.copyResize(image, width: dstWidth == 0 ? image.width : dstWidth, height: dstHeight == 0 ? image.height : dstHeight);
+    final resizedImg = img.copyResize(image, width: (minSide == 0 && dstWidth == 0) ? image.width : dstWidth,
+        height: (minSide == 0 && dstHeight == 0) ? image.height : dstHeight);
     return img.encodeJpg(resizedImg, quality: quality);
   }
 }

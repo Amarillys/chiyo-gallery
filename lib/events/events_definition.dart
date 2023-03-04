@@ -33,3 +33,14 @@ class ItemChooseEvent {
 class CloseDrawerEvent {
   CloseDrawerEvent();
 }
+
+class ImageChangedEvent {
+  ImageChangedEvent();
+}
+
+class PrevImageEvent {
+  PrevImageEvent();
+}
+class NextImageEvent {
+  NextImageEvent();
+}

@@ -1,5 +1,7 @@
+import 'package:chiyo_gallery/events/events_definition.dart';
 import 'package:flutter/material.dart';
-import '../components/fullscreen_viewer.dart';
+import 'package:chiyo_gallery/events/eventbus.dart';
+import 'package:chiyo_gallery/components/fullscreen_viewer.dart';
 
 class ViewerPage extends StatefulWidget {
   final List<String> imagePaths;
@@ -15,12 +17,20 @@ class ViewerState extends State<ViewerPage> {
   int currentIndex = 0;
   Color buttonBg = const Color.fromRGBO(100, 100, 100, 0.55);
   static const iconColor = Color.fromRGBO(233, 233, 233, 0.95);
+  static final eventBus = GlobalEventBus.instance;
 
   @override
   void initState() {
     super.initState();
     imagePath = widget.imagePaths[widget.imageIndex];
     currentIndex = widget.imageIndex;
+
+    eventBus.on<PrevImageEvent>().listen((event) {
+      setState(prevPicture);
+    });
+    eventBus.on<NextImageEvent>().listen((event) {
+      setState(nextPicture);
+    });
   }
 
   @override
@@ -81,9 +91,7 @@ class ViewerState extends State<ViewerPage> {
     } else {
       currentIndex++;
     }
-    setState(() {
-      imagePath = widget.imagePaths[currentIndex];
-    });
+    setupImage();
   }
 
   prevPicture() {
@@ -92,6 +100,11 @@ class ViewerState extends State<ViewerPage> {
     } else {
       currentIndex--;
     }
+    setupImage();
+  }
+
+  void setupImage() {
+    eventBus.fire(ImageChangedEvent());
     setState(() {
       imagePath = widget.imagePaths[currentIndex];
     });
