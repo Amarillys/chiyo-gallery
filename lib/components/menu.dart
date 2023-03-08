@@ -1,9 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'package:chiyo_gallery/utils/config.dart';
+import 'package:chiyo_gallery/components/custom_panel.dart';
 import 'package:chiyo_gallery/events/eventbus.dart';
 import 'package:chiyo_gallery/events/events_definition.dart';
-import 'package:chiyo_gallery/utils/config.dart';
 
 class ContextMenu extends StatefulWidget {
   const ContextMenu({super.key});
@@ -43,27 +44,28 @@ class _ContextMenuState extends State<ContextMenu> {
   }
 
   void buildOptions () {
+    options = [];
+    final normalOptions = [
+      PopupMenuItem(
+        value: 'layout_options',
+        child: Text('layoutType'.tr())
+      ),
+      const PopupMenuItem(
+        value: 'move',
+        child: Text('移动文件'),
+      )
+    ];
     if (selectedIndexes.length == 1) {
+      normalOptions.add(PopupMenuItem(
+        value: 'add_collection',
+        child: Text('addToCollection'.tr()),
+      ));
       setState(() {
-        options = <PopupMenuEntry>[
-          PopupMenuItem(
-            value: 'add_collection',
-            child: Text(AppLocalizations.of(context)!.addToCollection),
-          ),
-          const PopupMenuItem(
-            value: 'move',
-            child: Text('移动文件'),
-          )
-        ];
+        options = [...options, ... normalOptions];
       });
     } else {
       setState(() {
-        options = <PopupMenuEntry>[
-          const PopupMenuItem(
-            value: 'move',
-            child: Text('移动文件'),
-          )
-        ];
+        options = normalOptions;
       });
     }
   }
@@ -76,6 +78,20 @@ class _ContextMenuState extends State<ContextMenu> {
         collections.add(paths[selectedIndexes[0]]);
         GlobalConfig.set(ConfigMap.collections, collections);
         break;
+      case 'layout_options':
+        eventBus.fire(ShowCustomPanelEvent([
+          CustomOption(type: 'checkbox', valuePath: ConfigMap.showHidden, title: 'displayHidden'),
+          CustomOption(type: 'selections', valuePath: ConfigMap.layoutType, title: 'layoutType', selections: [
+            Selection(Icons.list, 'list', 'list'),
+            Selection(Icons.window, 'tiling', 'tiling'),
+            Selection(Icons.image, 'gallery', 'gallery')
+          ])
+        ]));
+        break;
     }
+  }
+
+  void handlerChangeLayout (value) {
+
   }
 }

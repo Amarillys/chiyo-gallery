@@ -4,9 +4,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:external_path/external_path.dart';
 import 'package:logger/logger.dart';
 import 'package:toast/toast.dart';
-
 import 'package:open_file/open_file.dart';
+
 import "base.dart";
+import 'package:chiyo_gallery/utils/config.dart';
 
 class AndroidStorage implements BaseStorage {
   bool withPermission = false;
@@ -73,6 +74,12 @@ class AndroidStorage implements BaseStorage {
     } on FileSystemException catch (e) {
       Logger().w('读取路径出错：$e');
     }
+
+    bool showHidden = GlobalConfig.get(ConfigMap.showHidden);
+    if (!showHidden) {
+      fileList = fileList.where((element) => !p.basename(element.path).startsWith('.')).toList();
+    }
+
     if (extensions.isEmpty) return fileList;
 
     return fileList.where((file) {

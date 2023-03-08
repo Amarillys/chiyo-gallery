@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:core';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:path/path.dart' as p;
 
 import 'package:chiyo_gallery/events/eventbus.dart';
@@ -40,7 +40,7 @@ class _CollectionBarState extends State<CollectionBar> {
         dense: true,
           child: ExpansionTile(
             initiallyExpanded: true,
-            title: Text(AppLocalizations.of(context)!.collection,
+              title: Text(ConfigMap.collections.tr(),
             style: const TextStyle(fontSize: 16)),
             children: generateCollectionWidget()
         ),

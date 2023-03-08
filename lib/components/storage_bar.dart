@@ -4,7 +4,7 @@ import 'package:chiyo_gallery/events/eventbus.dart';
 import 'package:chiyo_gallery/events/events_definition.dart';
 import 'package:chiyo_gallery/utils/image_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'package:chiyo_gallery/storage/storage.dart';
 import 'package:chiyo_gallery/utils/config.dart';
@@ -22,7 +22,7 @@ class StorageBar extends StatelessWidget {
         dense: true,
         child: ExpansionTile(
             initiallyExpanded: true,
-            title: Text(AppLocalizations.of(context)!.storageDevice,
+            title: Text('storageDevice'.tr(),
                 style: const TextStyle(fontSize: 16)),
             children: generateStorageList(context)));
   }
@@ -35,7 +35,7 @@ class StorageBar extends StatelessWidget {
           onTap: () { onItemTap(path); },
           child: Row(children: [
             setupIconByType(i),
-            Text(setupStorageLabel(path, ctx))
+            Text(setupStorageLabel(path).tr())
           ]))
       );
     }
@@ -64,15 +64,7 @@ class StorageBar extends StatelessWidget {
             size: 40));
   }
 
-  static String setupStorageLabel(String path, BuildContext ctx) {
-    final locale = AppLocalizations.of(ctx);
-    var convertedText = storage.convertStoragePathForDisplay(path);
-    if (convertedText == 'internalStorage') {
-      return locale!.internalStorage;
-    } else if (convertedText == 'externalStorage') {
-      return locale!.externalStorage;
-    } else {
-      return convertedText;
-    }
+  static String setupStorageLabel(String path) {
+    return storage.convertStoragePathForDisplay(path);
   }
 }

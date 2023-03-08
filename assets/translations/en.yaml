@@ -1,0 +1,17 @@
+helloWorld: Hello Chiyo!
+initializing: Initializing...
+oneMoreClickToExit: Return again to exit...
+noFiles: No Files...> <
+n_files: "{count} Items"
+empty: Empty
+collections: Collection
+storageDevice: Storage Devices
+internalStorage: Internal Storage
+externalStorage: External Storage
+addToCollection: Add to Collections
+displayHidden: Display Hidden Files
+
+layoutType: Layout Type
+List: List
+tiling: Tiling
+gallery: Gallery

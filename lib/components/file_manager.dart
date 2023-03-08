@@ -1,8 +1,8 @@
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import "package:path/path.dart" as p;
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:toast/toast.dart';
 
 import 'package:chiyo_gallery/components/file.dart';
@@ -26,7 +26,8 @@ class FileBrowser extends StatefulWidget {
 
 class ViewerState extends State<FileBrowser> {
   static final eventBus = GlobalEventBus.instance;
-  static const int rowWidth = 300;
+  double rowWidth = 300;
+  double rowHeight = 75;
   List<MediaFile> files = [];
   List<String> histories = [""];
   List<int> selected = [];
@@ -39,6 +40,7 @@ class ViewerState extends State<FileBrowser> {
   Color _baseColor = Colors.green;
   bool showEmptyFile = false;
   bool waitForIsolate = true;
+  String layoutType = 'list';
 
   @override
   void initState() {
@@ -61,6 +63,25 @@ class ViewerState extends State<FileBrowser> {
       }
     });
 
+    eventBus.on<ShowHiddenOptionChangedEvent>().listen((event) {
+      GlobalConfig.set(ConfigMap.showHidden, event.showHidden);
+      initPath(currentPath);
+    });
+    
+    // layout
+    layoutType = GlobalConfig.get(ConfigMap.layoutType);
+    final Map<String, double> layoutWidth = {
+      'tiling': 180,
+      'list': 300,
+      'gallery': 140
+    };
+    rowWidth = layoutWidth[layoutType]!;
+    eventBus.on<LayoutChangedEvent>().listen((event) {
+      setState(() {
+        layoutType = event.layoutType;
+        rowWidth = layoutWidth[layoutType]!;
+      });
+    });
   }
 
   void loadConfig() {
@@ -136,57 +157,120 @@ class ViewerState extends State<FileBrowser> {
       onWillPop: () async { return !goToParentDirectory(context); },
       child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         double parentWidth = constraints.maxWidth;
-        final int columnCount = parentWidth ~/ rowWidth;
+        int columnCount = parentWidth ~/ rowWidth;
         final int rowCount = (files.length / columnCount).ceil();
+        rowHeight = 75;
+        double columnGap = 2;
+        if (layoutType == 'gallery') {
+          rowWidth = parentWidth / columnCount;
+          rowHeight = rowWidth;
+          if (parentWidth > 320 && parentWidth < 540) {
+            rowHeight = rowWidth * 0.8;
+          }
+        } else if (layoutType == 'tiling') {
+          if (parentWidth > 320 && parentWidth < 540) {
+            columnCount = 3;
+            rowWidth = parentWidth / columnCount;
+          } else {
+            rowWidth = parentWidth / columnCount;
+          }
+          rowHeight = rowWidth;
+        }
         return SizedBox.expand(
           child: files.isNotEmpty
               ? SingleChildScrollView(
                   scrollDirection: Axis.vertical,
                   controller: _scrollController,
                   child: LayoutGrid(
-                    columnGap: 10,
-                    columnSizes: List.generate(columnCount, (index) => 1.fr),
-                    rowSizes: List.generate(rowCount, (index) => const FixedTrackSize(70)),
-                    children: List.generate(files.length, (index) {
-                      final currentFile = files[index];
-                      bool isSelected = selected.contains(index);
-                      return InkWell(
-                          onTap: () { onItemTap(currentFile); },
-                          onLongPress: () { onItemLongPress(currentFile, index); },
-                          child: Card(
-                              margin: const EdgeInsets.only(top: 0, bottom: 0),
-                              color: isSelected ? const Color.fromRGBO(180, 180, 180, 0.4) : const Color.fromRGBO(250, 250, 250, 0.3),
-                              elevation: 0,
-                              child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Padding(
-                                        padding: const EdgeInsets.only(left: 5, right: 10),
-                                        child: setupThumbNailOrIcons(currentFile, _baseColor)),
-                                    Expanded(
-                                      child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                              Text(p.basename(currentFile.path),
-                                                  maxLines: 2,
-                                                  overflow: TextOverflow.ellipsis),
-                                              generateSizeDescription(currentFile, context, descStyle),
-                                              const CustomUnderline()
-                                          ]),
-                                    )
-                                  ])));
-                    }),
-                  ))
+                      columnGap: columnGap,
+                      rowGap: columnGap,
+                      columnSizes: List.generate(columnCount, (index) => 1.fr),
+                      rowSizes: List.generate(rowCount, (index) => FixedTrackSize(rowHeight)),
+                      children: List.generate(files.length, (index) {
+                        final currentFile = files[index];
+                        return InkWell(
+                            onTap: () { onItemTap(currentFile); },
+                            onLongPress: () { onItemLongPress(currentFile, index); },
+                            child: generateFileLayout(currentFile, index)
+                        );
+                      })))
               : Center(child: SizedBox(
                   height: 200,
                   child: Column(
                       children: [const Icon(Icons.folder_off, size: 128, color: Colors.pink),
-                          Text(AppLocalizations.of(context)!.noFiles,
+                          Text('noFiles'.tr(),
                               style: const TextStyle(fontSize: 20, color: Colors.black45))])))
       );
     }));
+  }
+
+  Widget generateFileLayout(MediaFile currentFile, int index) {
+    if (layoutType == 'tiling') {
+      return buildTilingLayout(currentFile, index);
+    } else if (layoutType == 'gallery') {
+      return buildGalleryLayout(currentFile, index);
+    } else {
+      return buildListLayout(currentFile, index);
+    }
+  }
+
+  Widget buildListLayout(MediaFile currentFile, int index) {
+    bool isSelected = selected.contains(index);
+    return Card(
+      margin: const EdgeInsets.only(top: 0, bottom: 0),
+      color: isSelected ? const Color.fromRGBO(180, 180, 180, 0.4) : const Color.fromRGBO(250, 250, 250, 0.3),
+      elevation: 0,
+      child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+                padding: const EdgeInsets.only(left: 5, right: 10),
+                child: setupThumbNailOrIcons(currentFile, _baseColor)),
+            Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    const SizedBox(width: double.infinity, height: 3),
+                    Text(p.basename(currentFile.path),
+                        maxLines: 2,
+                        style: const TextStyle(fontSize: 14),
+                        overflow: TextOverflow.ellipsis),
+                    generateSizeDescription(currentFile, context, descStyle),
+                    const CustomUnderline()
+                  ]),
+            )])
+    );
+  }
+
+  Widget buildTilingLayout(MediaFile currentFile, int index) {
+    return SizedBox(width: rowWidth, height: rowWidth, child: Column(
+      //mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        setupThumbNailOrIcons(currentFile, _baseColor, iconSize: rowWidth * 0.6),
+        Center(child: Text(p.basename(currentFile.path), textAlign: TextAlign.center, maxLines: 2))
+      ],
+    ));
+  }
+
+  Widget buildGalleryLayout(MediaFile currentFile, int index) {
+    if (!currentFile.shouldHaveThumbnails) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          setupThumbNailOrIcons(currentFile, _baseColor, iconSize: rowHeight * 0.66),
+          Container(
+            width: double.infinity,
+            height: 40,
+            color: Colors.grey.withOpacity(0.5),
+            child: Center(child: Text(p.basename(currentFile.path), maxLines: 2, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 16)))
+          )
+        ],
+      );
+    } else {
+      return setupThumbNailOrIcons(currentFile, _baseColor, iconSize: rowWidth, circle: false);
+    }
   }
 
   bool goToParentDirectory(BuildContext context) {
@@ -197,7 +281,7 @@ class ViewerState extends State<FileBrowser> {
         return false;
       }
       onExit = true;
-      Toast.show(AppLocalizations.of(context)!.oneMoreClickToExit);
+      Toast.show('oneMoreClickToExit'.tr());
       Future.delayed(const Duration(seconds: 1), () {
         onExit = false;
       });
@@ -208,29 +292,33 @@ class ViewerState extends State<FileBrowser> {
     return true;
   }
 
-  static setupThumbNailOrIcons(MediaFile file, Color baseColor) {
-    const double iconSize = 50;
+  static setupThumbNailOrIcons(MediaFile file, Color baseColor, { double iconSize = 50, circle = true }) {
     const padding = 4;
     if (file.type == 'directory') {
       return Icon(Icons.folder, size: iconSize + padding, color: baseColor);
     }
     if (file.shouldHaveThumbnails) {
       if (file.thumbnailFile == null) {
-        return Icon(Icons.insert_drive_file,
-            size: 50, color: baseColor);
+        return Icon(Icons.image,
+            size: iconSize + padding, color: baseColor);
       } else {
-        return Container(
-          margin: EdgeInsets.only(left: padding.toDouble()),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.all(Radius.circular(iconSize / 2)),
-            child: Image.file(file.thumbnailFile!,
-              fit: BoxFit.cover, height: iconSize - padding, width: iconSize - padding)),
-        );
+        if (circle) {
+          return Container(
+            margin: EdgeInsets.only(left: padding.toDouble(), bottom: padding.toDouble(), top: padding.toDouble()),
+            child: ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(iconSize / 2)),
+                child: Image.file(file.thumbnailFile!,
+                    fit: BoxFit.cover, height: iconSize, width: iconSize)),
+          );
+        } else {
+          return Image.file(file.thumbnailFile!,
+              fit: BoxFit.cover, height: iconSize, width: iconSize);
+        }
       }
     } else {
       switch (file.type) {
         case '.mp4':
-          return Icon(Icons.video_collection_outlined, size: iconSize, color: baseColor);
+          return Icon(Icons.video_collection_outlined, size: iconSize + padding, color: baseColor);
       }
       return Icon(Icons.insert_drive_file, size: iconSize + padding, color: baseColor);
     }
@@ -277,9 +365,9 @@ class ViewerState extends State<FileBrowser> {
     final size = currentFile.size;
     String description = '';
     if (currentFile.type == 'directory') {
-      description = AppLocalizations.of(ctx)!.empty;
+      description = 'empty'.tr();
       if (currentFile.fileCount > 0) {
-        description = AppLocalizations.of(ctx)!.n_files(currentFile.fileCount);
+        description = 'n_files'.tr(namedArgs: { 'count': currentFile.fileCount.toString() });
       }
     } else if (size == 0) {
       description = '0 B';

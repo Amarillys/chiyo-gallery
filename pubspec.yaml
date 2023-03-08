@@ -1,5 +1,5 @@
 name: chiyo_gallery
-description: A new Flutter project.
+description: A Flutter Gallery Explorer.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -49,12 +49,12 @@ dependencies:
   flutter_native_splash: ^2.2.18
   flutter_layout_grid: ^2.0.1
   intl: ^0.17.0
-  flutter_localizations: 
-    sdk: flutter
   event_bus: ^2.0.0
   photo_view: ^0.14.0
   path_provider: ^2.0.13
   flutter_isolate: ^2.0.4
+  easy_localization: ^3.0.1
+  easy_localization_loader: ^1.0.1+1
 
 
 dev_dependencies:
@@ -84,6 +84,7 @@ flutter:
   assets:
     - assets/images/srt.avif
     - assets/images/splash_center.png
+    - assets/translations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -91,7 +92,7 @@ flutter:
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages
 
-  generate: true
+  # generate: true
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a
@@ -119,8 +120,3 @@ flutter_native_splash:
   android_gravity: center
   web: false
 
-flutter_intl:
-  enabled: true
-  arb-dir: lib/l10n
-  template-arb-file: app_en.arb
-  output-localization-file: app_localizations.dart

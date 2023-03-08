@@ -15,7 +15,7 @@ class FullScreenViewer extends StatefulWidget {
 
 class FullScreenViewerState extends State<FullScreenViewer> {
   static final eventBus = GlobalEventBus.instance;
-  late PhotoViewController controller;
+  // late PhotoViewController controller;
   final PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   double initScale = 1;
 
@@ -58,7 +58,7 @@ class FullScreenViewerState extends State<FullScreenViewer> {
 
   @override
   void dispose() {
-    controller.dispose();
+    // controller.dispose();
     scaleController.dispose();
     super.dispose();
   }

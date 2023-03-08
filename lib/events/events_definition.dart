@@ -1,3 +1,5 @@
+import 'package:chiyo_gallery/components/custom_panel.dart';
+
 class ChangePathEvent {
   String path;
 
@@ -43,4 +45,23 @@ class PrevImageEvent {
 }
 class NextImageEvent {
   NextImageEvent();
+}
+
+class LayoutChangedEvent {
+  String layoutType;
+  LayoutChangedEvent(this.layoutType);
+}
+
+class ShowHiddenOptionChangedEvent {
+  bool showHidden;
+  ShowHiddenOptionChangedEvent(this.showHidden);
+}
+
+class ShowCustomPanelEvent {
+  List<CustomOption> menuOptions;
+  ShowCustomPanelEvent(this.menuOptions);
+}
+
+class HideCustomPanelEvent {
+  HideCustomPanelEvent();
 }

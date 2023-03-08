@@ -1,9 +1,9 @@
 
+import 'package:chiyo_gallery/components/custom_panel.dart';
 import 'package:chiyo_gallery/utils/string_util.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:toast/toast.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:path/path.dart' as p;
 
 import 'package:chiyo_gallery/pages/browser.dart';
@@ -24,6 +24,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static final eventBus = GlobalEventBus.instance;
+  bool showCustomPanel = false;
+  List<CustomOption> menuOptions = [];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -31,6 +33,19 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     eventBus.on<CloseDrawerEvent>().listen((event) {
       _scaffoldKey.currentState?.closeDrawer();
+    });
+
+    eventBus.on<ShowCustomPanelEvent>().listen((event) {
+      setState(() {
+        menuOptions = event.menuOptions;
+        showCustomPanel = true;
+      });
+    });
+
+    eventBus.on<HideCustomPanelEvent>().listen((event) {
+      setState(() {
+        showCustomPanel = false;
+      });
     });
   }
 
@@ -40,13 +55,25 @@ class _MyHomePageState extends State<MyHomePage> {
     return OrientationBuilder(
       builder: (BuildContext context, Orientation orientation) {
         bool isPortrait = orientation == Orientation.portrait;
-        final sideBarWidget = SideBar(isPortrait: isPortrait);
+
+        // header
         List<Widget> titleComps = [TitleBar(isPortrait: isPortrait)];
         if (!isPortrait) {
             titleComps.insert(0, Container(
               margin: const EdgeInsets.only(bottom: 3),
                 child: const Text("CHIYO GALLERY  - ", style: TextStyle(fontSize: 24))));
         }
+
+        // body
+        final sideBarWidget = SideBar(isPortrait: isPortrait);
+        List<Widget> bodyContent = [isPortrait ?
+          Row(children: const <Widget>[Expanded(flex: 1, child: BrowserPage())]):
+          Row(children: <Widget>[Expanded(flex: 2, child: sideBarWidget), const Expanded(flex: 6, child: BrowserPage())])
+        ];
+        if (showCustomPanel) {
+          bodyContent.add(CustomPanel(menuOptions: menuOptions));
+        }
+
         return Scaffold(
             key: _scaffoldKey,
             appBar: AppBar(
@@ -58,6 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: const Icon(Icons.arrow_back_ios_outlined),
                 onPressed: () {
                   eventBus.fire(PathBackEvent());
+                  eventBus.fire(HideCustomPanelEvent());
                 },
               ),
               actions: [
@@ -67,12 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 const ContextMenu()]
             ),
-            body: isPortrait ?
-                Row(children: const <Widget>[Expanded(flex: 1, child: BrowserPage())])
-              : Row(children: <Widget>[
-                      Expanded(flex: 2, child: sideBarWidget),
-                      const Expanded(flex: 6, child: BrowserPage())
-                ]),
+            body: Stack(children: bodyContent),
             floatingActionButton: FloatingActionButton(
               onPressed: () {},
               tooltip: 'Increment',
@@ -103,7 +126,7 @@ class _TitleBarState extends State<TitleBar> {
     eventBus.on<PathChangedEvent>().listen((event) {
       setState(() {
         paths = p.split(event.path);
-        if (paths.length > 0) {
+        if (paths.isNotEmpty) {
           paths[0] = storage.dealPrefixPath(paths[0]);
         }
       });

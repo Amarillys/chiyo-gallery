@@ -52,7 +52,7 @@ class ImageUtil {
   }
 
   static Future<File?> generateThumbnail(String filePath) async {
-    final int thumbnailWidth = GlobalConfig.get(ConfigMap.thumbnailWidth);
+    final int thumbnailWidth = GlobalConfig.get(ConfigMap.thumbnailWidth).toInt();
     final extension = p.extension(filePath);
     final convertParams = ConvertParams(filePath, minSide: thumbnailWidth);
     final fileStat = await File(filePath).stat();
@@ -186,7 +186,10 @@ class ImageUtil {
       case 'pink':
         return Colors.pink;
       default:
-        return Colors.white;
+        return Color.fromRGBO(int.parse(colorStr.substring(0, 2), radix: 16),
+            int.parse(colorStr.substring(2, 4), radix: 16),
+            int.parse(colorStr.substring(4, 6), radix: 16),
+            int.parse(colorStr.substring(6, 8), radix: 16) / 256.0);
     }
   }
 

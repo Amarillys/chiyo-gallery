@@ -1,5 +1,6 @@
 import "dart:io";
 import "dart:core";
+import "package:chiyo_gallery/utils/config.dart";
 import 'package:open_file/open_file.dart';
 import "package:path/path.dart" as p;
 import 'package:logger/logger.dart';
@@ -50,6 +51,14 @@ class WindowsStorage implements BaseStorage {
         fileList.add(entity);
       }
     }
+
+    // hide file
+    // TO-DO windows: https://pub.dev/documentation/win32/latest/winrt/GetFileAttributes.html
+    bool showHidden = GlobalConfig.get(ConfigMap.showHidden);
+    if (!showHidden) {
+      fileList = fileList.where((element) => !p.basename(element.path).startsWith('.')).toList();
+    }
+
     fileList.sort((a, b) {
       if (a is Directory && b is File) {
         return -1;
@@ -96,8 +105,12 @@ class WindowsStorage implements BaseStorage {
     for (var i = 0; i < diskSignal.length; ++i) {
       final partitionPath = '${diskSignal[i]}:/';
       final partition = Directory(partitionPath);
-      if (partition.existsSync()) {
-        partitions.add(partitionPath);
+      try {
+        if (partition.existsSync()) {
+          partitions.add(partitionPath);
+        }
+      } catch (e) {
+        Logger().e(e);
       }
     }
     return partitions;

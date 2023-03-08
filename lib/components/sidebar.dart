@@ -38,8 +38,12 @@ class SideBarState extends State<SideBar> {
     }
     return Container(
       width: widget.isPortrait ? MediaQuery.of(context).size.width / 1.5 : null,
+      height: MediaQuery.of(context).size.height,
       color: widget.isPortrait ? const Color.fromRGBO(250, 250, 250, 0.9) : Colors.transparent,
-      child: Column(children: widgets)
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(children: widgets),
+      )
     );
   }
 }
