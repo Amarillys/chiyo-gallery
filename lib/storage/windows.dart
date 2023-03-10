@@ -1,8 +1,8 @@
-import "dart:io";
-import "dart:core";
+import 'dart:io';
+import 'dart:core';
 import "package:chiyo_gallery/utils/config.dart";
 import 'package:open_file/open_file.dart';
-import "package:path/path.dart" as p;
+import 'package:path/path.dart' as p;
 import 'package:logger/logger.dart';
 
 import "base.dart";
@@ -81,6 +81,7 @@ class WindowsStorage implements BaseStorage {
 
   @override
   Future<ResultType> openFile(String path) {
+    Process.start('cmd', ['/c', 'start', ' ', path]);
     return Future.value(ResultType.done);
   }
 

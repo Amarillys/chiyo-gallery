@@ -115,6 +115,7 @@ class ImageUtil {
       '.gif': img.decodeGifFile,
       '.jpeg': img.decodeJpgFile,
       '.jpg': img.decodeJpgFile,
+      '.jfif': img.decodeJpgFile,
       '.png': img.decodePngFile,
       '.webp': img.decodeWebPFile,
       '.tga': img.decodeTgaFile

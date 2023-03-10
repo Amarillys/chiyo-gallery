@@ -5,6 +5,8 @@ Aim to support all format on all platforms.
 
 Working...
 
+Thanks to Solid Explorer →_→
+
 Support Information.
 
 |          | Android | Windows | Linux | iOS   | MacOS |
@@ -15,6 +17,6 @@ Support Information.
 
 | Codec           | JPEG  | PNG   | WEBP  | HEIF  | AVIF  | BMP   |
 | --------------- | ----- | ----- | ----- | ----- | ----- | ----- |
-| Decode          | √     | √     | TO-DO | √     | √     | TO-DO |
+| Decode          | √     | √     | TO-DO | √     | √     | √     |
 | Convert(Encode) | √     | √     | TO-DO | TO-DO | TO-DO | TO-DO |
 
