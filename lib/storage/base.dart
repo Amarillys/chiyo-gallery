@@ -1,4 +1,5 @@
 import "dart:io";
+import 'package:chiyo_gallery/components/file.dart';
 import 'package:open_file/open_file.dart';
 
 abstract class BaseStorage {

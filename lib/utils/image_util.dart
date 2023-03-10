@@ -179,17 +179,17 @@ class ImageUtil {
       return thumbCache;
   }
 
-  static Color mapColorFromString(String colorStr) {
+  static Color mapColorFromString(String colorStr, [double overOpacity = 1]) {
     switch (colorStr) {
       case 'blue':
-        return Colors.blue;
+        return Colors.blue.withOpacity(overOpacity);
       case 'pink':
-        return Colors.pink;
+        return Colors.pink.withOpacity(overOpacity);
       default:
         return Color.fromRGBO(int.parse(colorStr.substring(0, 2), radix: 16),
             int.parse(colorStr.substring(2, 4), radix: 16),
             int.parse(colorStr.substring(4, 6), radix: 16),
-            int.parse(colorStr.substring(6, 8), radix: 16) / 256.0);
+            int.parse(colorStr.substring(6, 8), radix: 16) / 256.0 * overOpacity);
     }
   }
 

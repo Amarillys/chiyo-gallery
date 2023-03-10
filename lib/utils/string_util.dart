@@ -11,3 +11,7 @@ class StringUtil {
     return '${str.substring(0, maxLength)}...';
   }
 }
+
+class ConstStr {
+  static String directory = 'directory';
+}

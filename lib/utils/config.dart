@@ -9,6 +9,7 @@ class ConfigMap {
   static const String thumbnailWidth = 'thumbnailWidth';
   static const String layoutType = 'layoutType';
   static const String showHidden = 'showHidden';
+  static const String sortType = 'sortType';
 }
 
 class GlobalConfig {
@@ -52,7 +53,8 @@ class GlobalConfig {
 
   static save() {
     final configFile = File(dataPath!);
-    configFile.writeAsString(jsonEncode(_data));
+    var encoder = const JsonEncoder.withIndent("  ");
+    configFile.writeAsString(encoder.convert(_data));
   }
 
   static String? get dataPath => _dataPath;
@@ -66,6 +68,7 @@ class ConfigData {
   String? _layoutType;
   bool? showHidden;
   double? thumbnailWidth;
+  String? sortType;
 
   ConfigData({ this.baseColor = 'pink',
     this.collections = const [],
@@ -74,6 +77,7 @@ class ConfigData {
     this.thumbnailWidth = 300,
     String? layoutType = 'list',
     this.showHidden,
+    this.sortType
   }): _layoutType = layoutType;
 
   factory ConfigData.fromMap(Map<String, dynamic> inputMap) {
@@ -85,6 +89,7 @@ class ConfigData {
     inputMap[ConfigMap.layoutType] ??= 'list';
     inputMap[ConfigMap.showHidden] ??= false;
     inputMap[ConfigMap.thumbnailWidth] ??= 300.0;
+    inputMap[ConfigMap.sortType] ??= 'alpha-up';
     return ConfigData(
       baseColor: inputMap[ConfigMap.baseColor],
       collections: inputCollections,
@@ -92,6 +97,7 @@ class ConfigData {
       initPath: inputMap[ConfigMap.initPath],
       layoutType: inputMap[ConfigMap.layoutType],
       showHidden: inputMap[ConfigMap.showHidden],
+      sortType: inputMap[ConfigMap.sortType],
       thumbnailWidth: inputMap[ConfigMap.thumbnailWidth]
     );
   }
@@ -110,6 +116,8 @@ class ConfigData {
         return _layoutType;
       case ConfigMap.showHidden:
         return showHidden;
+      case ConfigMap.sortType:
+        return sortType;
       case ConfigMap.thumbnailWidth:
         return thumbnailWidth;
     }
@@ -135,6 +143,9 @@ class ConfigData {
       case ConfigMap.showHidden:
         showHidden = value;
         break;
+      case ConfigMap.sortType:
+        sortType = value;
+        break;
       case ConfigMap.thumbnailWidth:
         thumbnailWidth = value;
         break;
@@ -156,6 +167,7 @@ class ConfigData {
       "initPath": initPath,
       "layoutType": _layoutType,
       "showHidden": showHidden,
+      "sortType": sortType,
       "thumbnailWidth": thumbnailWidth
     };
   }

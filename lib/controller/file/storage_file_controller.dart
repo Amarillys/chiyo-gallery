@@ -9,7 +9,7 @@ class StorageFileController implements FileController {
 
   @override
   Future<List<MediaFile>> fetchFile(
-      {String params = '', String sortType = 'normal'}) async {
+      {String params = '', String sortType = 'alpha-up'}) async {
     String path = params;
     if (!permissionGranted) {
       await FileController.storage.grantPermission();
@@ -25,17 +25,13 @@ class StorageFileController implements FileController {
     final List<FileSystemEntity> fileToShow =
         await FileController.storage.dirFiles(path);
 
-    final files = fileToShow.map((f) => MediaFile(f.path));
-    if (sortType == 'date-down') {
-      files.toList().sort((a, b) {
-        return 0 - a.modified.compareTo(b.modified);
-      });
-    } else if (sortType == 'date-up') {
-      files.toList().sort((a, b) {
-        return a.modified.compareTo(b.modified);
-      });
-    }
-    return files.toList();
+    return fileToShow.map((f) => MediaFile(f.path)).toList();
+  }
+
+  @override
+  List<MediaFile> sort(List<MediaFile> files, String sortType) {
+    files.sort(FileController.generateSortFunction(sortType));
+    return files;
   }
 
   @override

@@ -33,13 +33,12 @@ class ViewerState extends State<FileBrowser> {
   List<int> selected = [];
   bool historyBacking = false;
   String currentPath = '';
-  String sortType = 'normal';
   late TextStyle descStyle;
   bool onExit = false;
   final _scrollController = ScrollController();
   Color _baseColor = Colors.green;
   bool showEmptyFile = false;
-  bool waitForIsolate = true;
+  String sortType = 'name-up';
   String layoutType = 'list';
 
   @override
@@ -82,6 +81,14 @@ class ViewerState extends State<FileBrowser> {
         rowWidth = layoutWidth[layoutType]!;
       });
     });
+
+    sortType = GlobalConfig.get(ConfigMap.sortType);
+    eventBus.on<SortTypeChangedEvent>().listen((event) {
+      setState(() {
+        sortType = event.sortType;
+        sortFiles(files);
+      });
+    });
   }
 
   void loadConfig() {
@@ -94,13 +101,10 @@ class ViewerState extends State<FileBrowser> {
 
   void initPath([String params = '']) async {
     var fetchedFiles =
-        await widget.controller.fetchFile(params: params, sortType: sortType);
+        await widget.controller.fetchFile(params: params);
     if (!showEmptyFile) {
       fetchedFiles = fetchedFiles.where((file) => file.type == 'directory' || file.size > 0).toList();
     }
-    setState(() {
-      files = fetchedFiles;
-    });
     if (historyBacking) {
       historyBacking = false;
     } else {
@@ -110,12 +114,17 @@ class ViewerState extends State<FileBrowser> {
     eventBus.fire(PathChangedEvent(params));
     eventBus.fire(ClearItemChooseEvent());
     selected = [];
-    if (waitForIsolate) {
-      await Future.delayed(const Duration(seconds: 1));
-      waitForIsolate = false;
-    }
+    sortFiles(fetchedFiles);
     setupFile();
   }
+
+  sortFiles (List<MediaFile> fetchedFiles) {
+    fetchedFiles = widget.controller.sort(fetchedFiles, sortType);
+    setState(() {
+      files = fetchedFiles;
+    });
+  }
+
 
   setupFile() {
     scrollToTop();

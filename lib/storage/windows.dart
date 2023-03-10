@@ -30,7 +30,7 @@ class WindowsStorage implements BaseStorage {
   }
 
   @override
-  Future<List<FileSystemEntity>> dirFiles(String folderPath, {List<String> extensions = const [], String sortType = 'normal'}) async {
+  Future<List<FileSystemEntity>> dirFiles(String folderPath, {List<String> extensions = const []}) async {
     Directory folder = Directory(folderPath);
     if (!await folder.exists()) {
       throw FileSystemException ('folder does not exist', folderPath);
@@ -58,15 +58,6 @@ class WindowsStorage implements BaseStorage {
     if (!showHidden) {
       fileList = fileList.where((element) => !p.basename(element.path).startsWith('.')).toList();
     }
-
-    fileList.sort((a, b) {
-      if (a is Directory && b is File) {
-        return -1;
-      } else if (a is File && b is Directory) {
-        return 1;
-      }
-      return a.path.toUpperCase().compareTo(b.path.toUpperCase());
-    });
     if (extensions.isEmpty) return fileList;
 
     return fileList.where((file) {
@@ -87,7 +78,6 @@ class WindowsStorage implements BaseStorage {
   List<String> getExternalStoragePath() {
     return externalStoragePath;
   }
-
 
   @override
   Future<ResultType> openFile(String path) {

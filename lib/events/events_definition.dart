@@ -65,3 +65,17 @@ class ShowCustomPanelEvent {
 class HideCustomPanelEvent {
   HideCustomPanelEvent();
 }
+
+class SortTypeChangedEvent {
+  String sortType;
+  SortTypeChangedEvent(this.sortType);
+}
+
+buildEventFromString(String eventType, value) {
+  switch (eventType) {
+    case 'sortType':
+      return SortTypeChangedEvent(value);
+    case 'layoutType':
+      return LayoutChangedEvent(value);
+  }
+}

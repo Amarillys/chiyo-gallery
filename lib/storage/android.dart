@@ -48,8 +48,7 @@ class AndroidStorage implements BaseStorage {
   }
 
   @override
-  Future<List<FileSystemEntity>> dirFiles(String folderPath,
-      {List<String> extensions = const []}) async {
+  Future<List<FileSystemEntity>> dirFiles(String folderPath, {List<String> extensions = const []}) async {
     if (folderPath == '/storage' || folderPath == '/storage/') {
       return Future.value(externalStoragePath
           .map((storagePath) => Directory(storagePath))
@@ -63,14 +62,6 @@ class AndroidStorage implements BaseStorage {
     List<FileSystemEntity> fileList = [];
     try {
       fileList = await folder.list(recursive: false).toList();
-      fileList.sort((a, b) {
-        if (a is Directory && b is File) {
-          return -1;
-        } else if (a is File && b is Directory) {
-          return 1;
-        }
-        return a.path.toUpperCase().compareTo(b.path.toUpperCase());
-      });
     } on FileSystemException catch (e) {
       Logger().w('读取路径出错：$e');
     }

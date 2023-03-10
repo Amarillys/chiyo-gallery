@@ -15,3 +15,13 @@ layoutType: Layout Type
 List: 敷き詰める
 tiling: Tiling
 gallery: ギャラリー
+
+sortType: Sort Type
+dateUp: Date Up
+dateDown: Date Down
+nameUp: Name Up
+nameDown: Name Down
+sizeUp: Size Up
+sizeDown: Size Down
+typeUp: Type Up
+typeDown: Type Down

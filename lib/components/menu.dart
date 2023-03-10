@@ -36,6 +36,7 @@ class _ContextMenuState extends State<ContextMenu> {
   @override
   Widget build(BuildContext ctx) {
     return PopupMenuButton(
+        onOpened: () { eventBus.fire(HideCustomPanelEvent()); },
         onSelected: handleOptions,
         itemBuilder: (BuildContext ctx) {
           return options;
@@ -82,9 +83,19 @@ class _ContextMenuState extends State<ContextMenu> {
         eventBus.fire(ShowCustomPanelEvent([
           CustomOption(type: 'checkbox', valuePath: ConfigMap.showHidden, title: 'displayHidden'),
           CustomOption(type: 'selections', valuePath: ConfigMap.layoutType, title: 'layoutType', selections: [
-            Selection(Icons.list, 'list', 'list'),
-            Selection(Icons.window, 'tiling', 'tiling'),
-            Selection(Icons.image, 'gallery', 'gallery')
+            Selection(Icons.list, 'list', 'list', 'layoutType'),
+            Selection(Icons.window, 'tiling', 'tiling', 'layoutType'),
+            Selection(Icons.image, 'gallery', 'gallery', 'layoutType')
+          ]),
+          CustomOption(type: 'selections', valuePath: ConfigMap.sortType, title: ConfigMap.sortType, selections: [
+            Selection(Icons.sort_by_alpha, 'name-up', 'nameUp', 'sortType'),
+            Selection(Icons.calendar_month, 'date-up', 'dateUp', 'sortType'),
+            Selection(Icons.filter_list, 'size-up', 'sizeUp', 'sortType'),
+            // Selection(Icons.file_copy, 'type-up', 'typeUp', 'sortType'),
+            Selection(Icons.sort_by_alpha_outlined, 'name-down', 'nameDown', 'sortType'),
+            Selection(Icons.calendar_month, 'date-down', 'dateDown', 'sortType'),
+            Selection(Icons.filter_list_outlined, 'size-down', 'sizeDown', 'sortType'),
+            // Selection(Icons.file_copy, 'type-down', 'typeDown', 'sortType'),
           ])
         ]));
         break;

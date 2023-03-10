@@ -15,3 +15,13 @@ layoutType: 视图选项
 List: 列表
 tiling: 平铺
 gallery: 画廊
+
+sortType: Sort Type
+dateUp: Date Up
+dateDown: Date Down
+nameUp: Name Up
+nameDown: Name Down
+sizeUp: 大小 ↑
+sizeDown: 大小 ↓
+typeUp: Type Up
+typeDown: Type Down
