@@ -71,11 +71,18 @@ class SortTypeChangedEvent {
   SortTypeChangedEvent(this.sortType);
 }
 
+class LanguageChangedEvent {
+  List<String> language;
+  LanguageChangedEvent(this.language);
+}
+
 buildEventFromString(String eventType, value) {
   switch (eventType) {
     case 'sortType':
       return SortTypeChangedEvent(value);
     case 'layoutType':
       return LayoutChangedEvent(value);
+    case 'language':
+      return LanguageChangedEvent(value);
   }
 }

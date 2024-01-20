@@ -7,6 +7,7 @@ class ConfigMap {
   static const String descFontColor = 'descFontColor';
   static const String initPath = 'initPath';
   static const String thumbnailWidth = 'thumbnailWidth';
+  static const String language = 'language';
   static const String layoutType = 'layoutType';
   static const String showHidden = 'showHidden';
   static const String sortType = 'sortType';
@@ -65,6 +66,7 @@ class ConfigData {
   List<String>? collections;
   String? descFontColor;
   String? initPath;
+  List<String>? language;
   String? _layoutType;
   bool? showHidden;
   double? thumbnailWidth;
@@ -74,6 +76,7 @@ class ConfigData {
     this.collections = const [],
     this.descFontColor = '802020B0',
     this.initPath = '',
+    this.language = const [],
     this.thumbnailWidth = 300,
     String? layoutType = 'list',
     this.showHidden,
@@ -86,6 +89,7 @@ class ConfigData {
     inputMap[ConfigMap.baseColor] ??= 'pink';
     inputMap[ConfigMap.descFontColor] ??= '802020B0';
     inputMap[ConfigMap.initPath] ??= '';
+    inputMap[ConfigMap.language] ??= ['zh', 'CN'];
     inputMap[ConfigMap.layoutType] ??= 'list';
     inputMap[ConfigMap.showHidden] ??= false;
     inputMap[ConfigMap.thumbnailWidth] ??= 300.0;
@@ -95,6 +99,7 @@ class ConfigData {
       collections: inputCollections,
       descFontColor: inputMap[ConfigMap.descFontColor],
       initPath: inputMap[ConfigMap.initPath],
+      language: inputMap[ConfigMap.language],
       layoutType: inputMap[ConfigMap.layoutType],
       showHidden: inputMap[ConfigMap.showHidden],
       sortType: inputMap[ConfigMap.sortType],
@@ -112,6 +117,8 @@ class ConfigData {
         return descFontColor;
       case ConfigMap.initPath:
         return initPath;
+      case ConfigMap.language:
+        return language;
       case ConfigMap.layoutType:
         return _layoutType;
       case ConfigMap.showHidden:
@@ -136,6 +143,9 @@ class ConfigData {
         break;
       case ConfigMap.initPath:
         initPath = value;
+        break;
+      case ConfigMap.language:
+        language = value;
         break;
       case ConfigMap.layoutType:
         _layoutType = value;
@@ -165,6 +175,7 @@ class ConfigData {
       "collections": collections,
       "descFontColor": descFontColor,
       "initPath": initPath,
+      "language": language,
       "layoutType": _layoutType,
       "showHidden": showHidden,
       "sortType": sortType,

@@ -1,5 +1,6 @@
 
 import 'package:chiyo_gallery/components/custom_panel.dart';
+import 'package:chiyo_gallery/pages/settings.dart';
 import 'package:chiyo_gallery/utils/string_util.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -59,9 +60,13 @@ class _MyHomePageState extends State<MyHomePage> {
         // header
         List<Widget> titleComps = [TitleBar(isPortrait: isPortrait)];
         if (!isPortrait) {
-            titleComps.insert(0, Container(
-              margin: const EdgeInsets.only(bottom: 3),
-                child: const Text("CHIYO GALLERY  - ", style: TextStyle(fontSize: 24))));
+          titleComps.insert(0, IconButton(
+            icon: const Icon(Icons.settings, size: 24),
+            onPressed: () { _scaffoldKey.currentState?.openDrawer(); }
+          ));
+          titleComps.insert(0, Container(
+            margin: const EdgeInsets.only(bottom: 3),
+              child: const Text("CHIYO GALLERY     ", style: TextStyle(fontSize: 24))));
         }
 
         // body
@@ -71,8 +76,10 @@ class _MyHomePageState extends State<MyHomePage> {
           Row(children: <Widget>[Expanded(flex: 2, child: sideBarWidget), const Expanded(flex: 6, child: BrowserPage())])
         ];
         if (showCustomPanel) {
-          bodyContent.add(CustomPanel(menuOptions: menuOptions));
+          bodyContent.add(CustomPanel(menuOptions: menuOptions,
+              position: const EdgeInsets.only(right: 0), size: const Size(250, 550)));
         }
+        bodyContent.add(const SettingPage());
 
         return Scaffold(
             key: _scaffoldKey,

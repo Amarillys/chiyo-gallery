@@ -6,13 +6,14 @@ import 'package:chiyo_gallery/events/events_definition.dart';
 import 'package:chiyo_gallery/utils/config.dart';
 import 'package:chiyo_gallery/utils/image_util.dart';
 import 'package:chiyo_gallery/utils/theme.dart';
-import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class CustomPanel extends StatefulWidget {
   final List<CustomOption> menuOptions;
-  const CustomPanel({super.key, required this.menuOptions});
+  final EdgeInsets position;
+  final Size size;
+  const CustomPanel({super.key, required this.menuOptions, required this.position, required this.size});
 
   @override
   State<CustomPanel> createState () => _CustomPanelState();
@@ -37,9 +38,12 @@ class _CustomPanelState extends State<CustomPanel> {
                 }
             )),
         Positioned(
-          right: 0,
-          width: 250,
-          height: 550,
+          top: widget.position.top,
+          bottom: widget.position.bottom,
+          left: widget.position.left,
+          right: widget.position.right,
+          width: widget.size.width,
+          height: widget.size.height,
           child: GestureDetector(
             onTapUp: (details) {
               inPanel = true;
