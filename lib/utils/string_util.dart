@@ -10,6 +10,12 @@ class StringUtil {
     }
     return '${str.substring(0, maxLength)}...';
   }
+
+  static List<String> splitLang(String language) {
+    List<String> languageValue = language.split('-').toList();
+    if (languageValue.length == 1) { languageValue.add(''); }
+    return [languageValue.elementAt(0), languageValue.elementAt(1)];
+  }
 }
 
 class ConstStr {

@@ -41,7 +41,7 @@ class ConvertParams {
 }
 
 class ImageUtil {
-  static final List<String> thumbnailExt = ['.bmp', '.jpg', '.png', '.avif', '.jfif', '.jpeg', '.heic', '.webp', 'tiff'];
+  static final List<String> thumbnailExt = ['.bmp', '.jpg', '.png', '.avif', '.gif', '.jfif', '.jpeg', '.heic', '.webp', 'tiff'];
 
   static bool shouldHaveThumbnails(String type) {
     final matchResult = thumbnailExt.firstWhereOrNull((ext) => type == ext);
@@ -196,17 +196,9 @@ class ImageUtil {
 
   static Future<Uint8List> avifFileToJPG(Map<String, dynamic> params) async {
     const double hashScale = 1.0;
-    final hashCode = Object.hash(params['srcPath'], hashScale);
-    final Uint8List bytes = await File(params['srcPath']).readAsBytes();
+    final Uint8List bytes = await File(params['srcPath']).readAsBytes();    
 
-    final codec = AvifCodec(
-        key: hashCode,
-        avifBytes: bytes
-    );
-
-    await codec.ready();
-
-    final firstFrame = await codec.getNextFrame();
+    final firstFrame = (await decodeAvif(bytes)).elementAt(0);
     var originalWidth = firstFrame.image.width;
     var originalHeight = firstFrame.image.height;
     if (params['width'] == 0) {
@@ -215,7 +207,7 @@ class ImageUtil {
     if (params['height'] == 0) {
       params['height'] = originalHeight;
     }
-    codec.dispose();
+    
     // TO-DO: optimize image size
     final imageBytes =
     (await firstFrame.image.toByteData(format: ImageByteFormat.rawRgba))!

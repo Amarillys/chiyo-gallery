@@ -2,19 +2,19 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "chiyo_gallery",
+      "name": "Chiyo Gallery",
       "request": "launch",
       "type": "dart",
       "args": ["-d", "windows"]
     },
     {
-      "name": "chiyo_gallery (profile mode)",
+      "name": "Chiyo Gallery (profile mode)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile"
     },
     {
-      "name": "chiyo_gallery (release mode)",
+      "name": "Chiyo Gallery (release mode)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "release"

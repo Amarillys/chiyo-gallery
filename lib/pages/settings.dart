@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:chiyo_gallery/components/selector.dart';
 import 'package:chiyo_gallery/events/eventbus.dart';
 import 'package:chiyo_gallery/utils/config.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({ super.key });
@@ -24,9 +25,12 @@ class _SettingState extends State<SettingPage> {
       Selection(Languages.zhTW, Languages.zhTWIntro)
     ];
     return Positioned.fill(child: Column(
-      children: [
-        DropdownSelector(list: languageList, configPath: ConfigMap.language, eventType: 'language')
-      ]
+      children: [Row(
+          children: [
+            Text('${'language'.tr()} : '),
+            DropdownSelector(list: languageList, configPath: ConfigMap.language, eventType: 'language')
+          ]
+      )]
     ));
   }
 }

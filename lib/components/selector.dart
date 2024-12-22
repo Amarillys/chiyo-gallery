@@ -15,7 +15,7 @@ class DropdownSelector extends StatefulWidget {
 }
 
 class _DropdownSelectorState extends State<DropdownSelector> {
-  late dynamic dropdownValue;
+  late String dropdownValue;
   final eventBus = GlobalEventBus.instance;
 
   @override
@@ -27,17 +27,21 @@ class _DropdownSelectorState extends State<DropdownSelector> {
   @override
   Widget build(BuildContext context) {
     return DropdownButton(
+      value: dropdownValue,
       items: widget.list.map<DropdownMenuItem>((item) {
         return DropdownMenuItem(value: item.value, child: Text(item.text));
       }).toList(),
       onChanged: (value) {
         eventBus.fire(buildEventFromString(widget.eventType, value));
+        setState(() {
+          dropdownValue = value;
+        });
       });
   }
 }
 
 class Selection {
-  final dynamic value;
+  final String value;
   final String text;
   Selection(this.value, this.text);
 }

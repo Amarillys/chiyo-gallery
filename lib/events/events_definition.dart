@@ -72,8 +72,13 @@ class SortTypeChangedEvent {
 }
 
 class LanguageChangedEvent {
-  List<String> language;
+  String language;
   LanguageChangedEvent(this.language);
+}
+
+class GetImageToOpenEvent {
+  String imagePath;
+  GetImageToOpenEvent(this.imagePath);
 }
 
 buildEventFromString(String eventType, value) {

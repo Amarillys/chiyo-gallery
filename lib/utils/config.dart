@@ -66,7 +66,7 @@ class ConfigData {
   List<String>? collections;
   String? descFontColor;
   String? initPath;
-  List<String>? language;
+  String language;
   String? _layoutType;
   bool? showHidden;
   double? thumbnailWidth;
@@ -76,7 +76,7 @@ class ConfigData {
     this.collections = const [],
     this.descFontColor = '802020B0',
     this.initPath = '',
-    this.language = const [],
+    this.language = 'zh-CN',
     this.thumbnailWidth = 300,
     String? layoutType = 'list',
     this.showHidden,
@@ -89,7 +89,7 @@ class ConfigData {
     inputMap[ConfigMap.baseColor] ??= 'pink';
     inputMap[ConfigMap.descFontColor] ??= '802020B0';
     inputMap[ConfigMap.initPath] ??= '';
-    inputMap[ConfigMap.language] ??= ['zh', 'CN'];
+    inputMap[ConfigMap.language] ??= 'zh-CN';
     inputMap[ConfigMap.layoutType] ??= 'list';
     inputMap[ConfigMap.showHidden] ??= false;
     inputMap[ConfigMap.thumbnailWidth] ??= 300.0;

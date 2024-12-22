@@ -1,12 +1,15 @@
 import 'package:chiyo_gallery/events/events_definition.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:chiyo_gallery/events/eventbus.dart';
 import 'package:chiyo_gallery/components/fullscreen_viewer.dart';
 
 class ViewerPage extends StatefulWidget {
   final List<String> imagePaths;
   final int imageIndex;
-  const ViewerPage({ super.key, required this.imagePaths, required this.imageIndex });
+  final bool allowExit;
+  const ViewerPage({ super.key, required this.imagePaths, required this.imageIndex, required this.allowExit });
 
   @override
   State<ViewerPage> createState() => ViewerState();
@@ -36,51 +39,55 @@ class ViewerState extends State<ViewerPage> {
   @override
   Widget build(BuildContext context) {
     const radius = BorderRadius.all(Radius.circular(20));
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: FullScreenViewer(imagePath: imagePath)
-          ),
-          Positioned(
-              top: 30,
-              left: 30,
-              child: Material(
-                  color: Colors.transparent,
-                  child: ClipRRect(
-                    borderRadius: radius,
-                    child: InkWell(
-                        borderRadius: radius,
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                            padding: const EdgeInsets.all(10),
-                            color: const Color.fromRGBO(135, 135, 135, 1),
-                            child:const Icon(Icons.arrow_back, size: 28, color: Colors.white)
-                  ))))
-          ),
-          Container(
-            margin: const EdgeInsets.only(bottom: 15),
-            child: Align(
-              alignment: FractionalOffset.bottomCenter,
-              child: Material(
-                color: Colors.transparent,
-                child:ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(20)),
-                  child: Container(
-                    width: 300,
-                    height: 60,
-                    color: buttonBg,
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          setupActionIcon(Icons.arrow_back_ios_sharp, prevPicture),
-                          setupActionIcon(Icons.arrow_forward_ios_sharp, nextPicture),
-                        ],
-                      )
-                    ),
-                  ),
-            )),
-          )]
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (didPop) { dealPop(context); },
+      child: Scaffold(
+          body: Stack(
+              children: [
+                Positioned.fill(
+                    child: FullScreenViewer(imagePath: imagePath)
+                ),
+                Positioned(
+                    top: 30,
+                    left: 30,
+                    child: Material(
+                        color: Colors.transparent,
+                        child: ClipRRect(
+                            borderRadius: radius,
+                            child: InkWell(
+                                borderRadius: radius,
+                                onTap: () => Navigator.pop(context),
+                                child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    color: const Color.fromRGBO(135, 135, 135, 1),
+                                    child:const Icon(Icons.arrow_back, size: 28, color: Colors.white)
+                                ))))
+                ),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 15),
+                  child: Align(
+                      alignment: FractionalOffset.bottomCenter,
+                      child: Material(
+                        color: Colors.transparent,
+                        child:ClipRRect(
+                          borderRadius: const BorderRadius.all(Radius.circular(20)),
+                          child: Container(
+                              width: 300,
+                              height: 60,
+                              color: buttonBg,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  setupActionIcon(Icons.arrow_back_ios_sharp, prevPicture),
+                                  setupActionIcon(Icons.arrow_forward_ios_sharp, nextPicture),
+                                ],
+                              )
+                          ),
+                        ),
+                      )),
+                )]
+          )
       )
     );
   }
@@ -119,5 +126,12 @@ class ViewerState extends State<ViewerPage> {
           child: Icon(icon, color: iconColor),
         )
     );
+  }
+
+  void dealPop(BuildContext context) {
+    if (widget.allowExit) {
+      //Navigator.of(context).pop();
+      //SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+    }
   }
 }

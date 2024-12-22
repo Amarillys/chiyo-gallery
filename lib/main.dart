@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chiyo_gallery/utils/config.dart';
+import 'package:chiyo_gallery/utils/string_util.dart';
 import 'package:chiyo_gallery/utils/task_queue.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,7 +19,7 @@ void main() async {
   runApp(
       EasyLocalization(
         assetLoader: YamlAssetLoader(),
-        supportedLocales: const [Locale('en'), Locale('zh', 'CN'), Locale('ja', 'JP')],
+        supportedLocales: const [Locale('en'), Locale('zh', 'CN'), Locale('ja', 'JP'), Locale('zh', 'TW')],
         path: 'assets/translations',
         child: const ChiyoGallery())
       );
@@ -33,7 +34,8 @@ class ChiyoGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TO-DO
-    context.setLocale(const Locale('ja', 'JP'));
+    final languageValue = StringUtil.splitLang(GlobalConfig.get(ConfigMap.language));
+    context.setLocale(Locale(languageValue.elementAt(0), languageValue.elementAt(1)));
     return MaterialApp(
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,

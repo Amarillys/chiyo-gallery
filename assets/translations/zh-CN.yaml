@@ -1,4 +1,5 @@
 helloWorld: こんにちは、チヨ
+language: 语言
 initializing: 初始化中...
 oneMoreClickToExit: 一秒内再次返回，可以退出本程序
 noFiles: 没有文件！> <

@@ -3,10 +3,10 @@ class Languages {
   static String jaJPIntro = '日本語';
   static String enUSIntro = 'English';
   static String zhTWIntro = '繁體中文';
-  static List<String> zhCN = ['zh', 'CN'];
-  static List<String> jaJP = ['ja', 'JP'];
-  static List<String> enUS = ['en', 'US'];
-  static List<String> zhTW = ['zh', 'TW'];
+  static String zhCN = 'zh-CN';
+  static String jaJP = 'ja-JP';
+  static String enUS = 'en';
+  static String zhTW = 'zh-TW';
 }
 
 class LocaleMap {

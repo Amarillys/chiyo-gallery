@@ -40,6 +40,7 @@ class ViewerState extends State<FileBrowser> {
   bool showEmptyFile = false;
   String sortType = 'name-up';
   String layoutType = 'list';
+  bool justViewer = false;
 
   @override
   void initState() {
@@ -87,6 +88,23 @@ class ViewerState extends State<FileBrowser> {
       setState(() {
         sortType = event.sortType;
         sortFiles(files);
+      });
+    });
+
+    eventBus.on<LanguageChangedEvent>().listen((event) {
+      GlobalConfig.set(ConfigMap.language, event.language);
+      var localeValue = StringUtil.splitLang(event.language);
+      context.setLocale(Locale(localeValue.elementAt(0), localeValue.elementAt(1)));
+
+      initPath(currentPath);
+    });
+
+    eventBus.on<GetImageToOpenEvent>().listen((event) {
+      var newFile = MediaFile(event.imagePath);
+      setState(() {
+        justViewer = true;
+        files = [newFile];
+        onItemTap(newFile);
       });
     });
   }
@@ -162,8 +180,9 @@ class ViewerState extends State<FileBrowser> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async { return !goToParentDirectory(context); },
+    return PopScope(
+      canPop: justViewer,
+      onPopInvoked: (didPop) { goToParentDirectory(context); },
       child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         double parentWidth = constraints.maxWidth;
         int columnCount = parentWidth ~/ rowWidth;
@@ -244,7 +263,7 @@ class ViewerState extends State<FileBrowser> {
                     const SizedBox(width: double.infinity, height: 3),
                     Text(p.basename(currentFile.path),
                         maxLines: 2,
-                        style: const TextStyle(fontSize: 14),
+                        style: const TextStyle(fontSize: 14, height: 1.2),
                         overflow: TextOverflow.ellipsis),
                     generateSizeDescription(currentFile, context, descStyle),
                     const CustomUnderline()
@@ -273,7 +292,7 @@ class ViewerState extends State<FileBrowser> {
             width: double.infinity,
             height: 40,
             color: Colors.grey.withOpacity(0.5),
-            child: Center(child: Text(p.basename(currentFile.path), maxLines: 2, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 16)))
+            child: Center(child: Text(p.basename(currentFile.path), maxLines: 2, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 15)))
           )
         ],
       );
@@ -282,23 +301,30 @@ class ViewerState extends State<FileBrowser> {
     }
   }
 
-  bool goToParentDirectory(BuildContext context) {
+  void goToParentDirectory(BuildContext context) {
+    if (justViewer) {
+      setState(() {
+        justViewer = false;
+      });
+      return;
+    }
     final uriInfo = Uri.parse(currentPath);
     final parentPath = uriInfo.resolve('../').toString();
     if (parentPath == '' || !widget.controller.canAccess(parentPath)) {
       if (onExit) {
-        return false;
+        Navigator.of(context).pop();
+        return;
       }
       onExit = true;
       Toast.show('oneMoreClickToExit'.tr());
       Future.delayed(const Duration(seconds: 1), () {
         onExit = false;
       });
-      return true;
+      return;
     }
     scrollToTop();
     initPath(parentPath);
-    return true;
+    return;
   }
 
   static setupThumbNailOrIcons(MediaFile file, Color baseColor, { double iconSize = 50, circle = true }) {
@@ -347,7 +373,7 @@ class ViewerState extends State<FileBrowser> {
             context,
             MaterialPageRoute(
                 builder: (context) => ViewerPage(
-                    imagePaths: imagePaths, imageIndex: imageIndex)));
+                    imagePaths: imagePaths, imageIndex: imageIndex, allowExit: justViewer)));
         return;
       } else {
         FileController.storage.openFile(currentFile.path);

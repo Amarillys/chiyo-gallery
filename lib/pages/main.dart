@@ -1,4 +1,7 @@
 
+import 'dart:async';
+import 'dart:io' show Platform;
+
 import 'package:chiyo_gallery/components/custom_panel.dart';
 import 'package:chiyo_gallery/pages/settings.dart';
 import 'package:chiyo_gallery/utils/string_util.dart';
@@ -13,6 +16,9 @@ import 'package:chiyo_gallery/components/menu.dart';
 import 'package:chiyo_gallery/events/eventbus.dart';
 import 'package:chiyo_gallery/events/events_definition.dart';
 import 'package:chiyo_gallery/storage/storage.dart';
+import 'package:uri_to_file/uri_to_file.dart';
+
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -23,15 +29,18 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   static final eventBus = GlobalEventBus.instance;
   bool showCustomPanel = false;
   List<CustomOption> menuOptions = [];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String urlShared = '/';
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
     eventBus.on<CloseDrawerEvent>().listen((event) {
       _scaffoldKey.currentState?.closeDrawer();
     });
@@ -48,7 +57,29 @@ class _MyHomePageState extends State<MyHomePage> {
         showCustomPanel = false;
       });
     });
+
+    ReceiveSharingIntent.getTextStream().listen((String value) {
+      setState(() {
+        handleFile(value);
+      });
+    });
   }
+
+  Future<void> handleFile(String imagePath) async {
+    var filePath = imagePath;
+    if (Platform.isAndroid || Platform.isIOS) {
+      var file = await toFile(imagePath);
+      filePath = file.path;
+    }
+    eventBus.fire(GetImageToOpenEvent(filePath));
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -72,14 +103,14 @@ class _MyHomePageState extends State<MyHomePage> {
         // body
         final sideBarWidget = SideBar(isPortrait: isPortrait);
         List<Widget> bodyContent = [isPortrait ?
-          Row(children: const <Widget>[Expanded(flex: 1, child: BrowserPage())]):
+          const Row(children: <Widget>[Expanded(flex: 1, child: BrowserPage())]):
           Row(children: <Widget>[Expanded(flex: 2, child: sideBarWidget), const Expanded(flex: 6, child: BrowserPage())])
         ];
         if (showCustomPanel) {
           bodyContent.add(CustomPanel(menuOptions: menuOptions,
-              position: const EdgeInsets.only(right: 0), size: const Size(250, 550)));
+              position: const EdgeInsets.only(right: 4), size: const Size(250, 550)));
         }
-        bodyContent.add(const SettingPage());
+        const settingPage = SettingPage();
 
         return Scaffold(
             key: _scaffoldKey,
@@ -108,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
               tooltip: 'Increment',
               child: const Icon(Icons.add)
             ),
-            drawer: sideBarWidget
+            drawer: isPortrait ? sideBarWidget : settingPage
         );
     });
   }
